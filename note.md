@@ -21,3 +21,4 @@
   - 无语义化的标签`<div><span>`
 - **SSR(Server Side Render)** 服务端渲染
 在服务器中运行vue.js生成html代码返回给浏览器渲染。
+[//]: # (Great notes. I've already learned a lot.)
