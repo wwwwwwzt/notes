@@ -47,3 +47,5 @@
 - node 环境中使用 react jsx 模版：next 框架
   <img src=2023-10-09-22-52-04.png style="height:200px;width:300px;" />
 - _第 3-5 课完全没看懂_。
+
+[//]: # (Great notes. I've already learned a lot.)
