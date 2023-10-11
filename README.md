@@ -1,2 +1,3 @@
 # notes
-我的学习笔记
+
+Oscar Wang 的学习笔记
