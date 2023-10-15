@@ -311,3 +311,200 @@ input.addEventListener('keyup', function (e) {
   console.log(inputProxy.text);
 });
 ```
+
+##### rest 参数
+
+形式为"...变量名"，用于获取函数的多余参数。
+
+```js
+function xd(a, ...rest) {
+  //a 为 1, rest 为 [2，3]
+}
+xd(1, 2, 3);
+```
+
+##### 箭头函数
+
+- 更短的函数 `() => {}`
+- 不绑定 this
+- 没有**_arguments_** （获取函数入参）
+  以下情况 **_不能_** 使用箭头函数：
+- 定义对象
+  ```js
+  const object = {
+    room: 814,
+    sum: () => {
+      this.room; //此处无法得到object的room。因为this指向的是Window
+    },
+  };
+  ```
+- 定义 DOM 事件的回调函数
+  ```js
+  const h3 = document.getElementById('h3');
+  h3.addEventListener('click', () => {
+    this.innerHTML = 11;
+  });
+  ```
+- 定义构造函数
+  ```js
+  const Car = () => {
+    console.log(this);
+  };
+  ```
+
+##### 类
+
+```js
+class Parent {
+  constructor(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+}
+//继承
+class Student extends Parent {
+  constructor(name, age, grade) {
+    super(name, age); //super是在子类的构造函数中调用父类的构造函数
+    this.grade = grade;
+  }
+}
+```
+
+##### 模块化开发 import export
+
+&emsp;&emsp;使用 import 的时候会报错`Cannot use import statement outside a module`，此时需要在 html 中加入`<script src="./chap5.js" type="module" />`
+
+```js
+export const a = 1;       import * as test from '...' //test对象获得了所有导入
+export const b = 2;       import {a, b} from '...'  //分别导入
+
+export default {          import test from '...'
+  //全部导出                //test对象获得了所有导入
+};
+```
+
+##### Promise
+
+- Promise 是一个容器，里面保存着某个未来才会结束的事件（通常为异步）的结果
+- Promise 是一个对象，它可以获取异步操作的最终状态（成功或失败）
+- Promise 是一个构造函数，提供统一的 API。里面也可以放同步的代码。
+
+回调地狱 （可读性差、代码耦合、出错时无法排除）
+
+```js
+function request() {
+  axios.get('a.json').then((res) => {
+    if (res && res.data.code === 0) {
+      axios.get('b.json').then((res) => {
+        if (res && res.data.code === 0) {
+          axios.get('c.json').then((res) => {});
+        }
+      });
+    }
+  });
+}
+```
+
+Promise
+
+```js
+new Promise((resolve, reject) => {  //初始状态pending
+  resolve('成功');  //成功状态resolve
+  reject('失败');   //失败状态rejected
+})
+// .then(,)有两个入参，第一个成功时执行，第二个失败时执行。
+// 第二个入参的效果等同于.catch()，用.catch居多。
+.then((res) => {
+  console.log(res);
+},(err)=>{
+  console.log(err);
+});
+.catch((err) => {
+  console.log(err);
+});
+```
+
+Promise 解决回调地狱
+
+```js
+function request() {
+  return new Promise((resolve, reject) => {
+    axios.get('a.json').then((res) => {
+      if (res && res.status === 200) {
+        resolve(res.data.data.data);
+      } else {
+        reject('a接口请求失败');
+      }
+    });
+  });
+}
+
+function request() {
+  requestA()
+    .then((res) => {
+      console.log(res);
+      return requestB();
+    })
+    .then((res) => {
+      console.log(res);
+      return requestC();
+    })
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
+```
+
+Promise.all()方法
+&emsp;&emsp;此方法接受一个 promise 数组并返回一个 promise。然后当所有的 promise 都完成时会得到结果数组。当其中一个被拒绝时会抛出错误。
+
+```js
+function requestAll() {
+  Promise.all([requestA(), requestB(), requestC()])
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
+```
+
+Promise.race()方法
+&emsp;&emsp;Promse.race() 就是赛跑的意思，传入的 promise 数组里面哪个结果获得的快，就返回那个结果。不管结果本身是成功状态还是失败状态。
+
+##### async
+
+&emsp;&emsp;async 是异步的简写，Generator（不重要）的语法糖，用于声明一个函数是异步函数。
+
+async await 改造 promise.then 异步调用
+
+```js
+function requestA() {
+  return new Promise((resolve, reject) => {
+    axios.get('a.json').then((res) => {
+      setTimeout(() => {
+        resolve(res);
+        console.log('aaa');
+      }, 1000);
+    });
+  });
+}
+async function request() {
+  try {
+    const a = await requestA();
+    const b = await requestB();
+    const c = await requestC();
+    console.log(a, b, c);
+  } catch (err) {
+    console.log(err);
+  }
+}
+```
+
+##### The End...
+
+<div style="text-align:right;">2023/10/16 Oscar</div>
