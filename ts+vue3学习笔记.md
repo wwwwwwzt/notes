@@ -138,3 +138,32 @@ let b: oneToSix;
 ##### tsconfig.json
 
 在项目的根目录下创建一个 ts 的配置文件 tsconfig.json。添加配置后，只需要 tsc 命令即可完成对整个项目的编译。
+```json
+{
+  //定义希望被编译文件所有的目录
+  "include": ["./dev"],
+  //不被编译文件所有的目录
+  "exclude": ["./config"],
+  //定义被继承的配置文件
+  "extends": ["./config/base"],
+  //指定需要编译文件的列表
+  "files": ["one.ts", "two.ts", "three.ts", "four.ts"],
+  "compilerOptions": {
+    //指定ts编译的js目标版本
+    "target": "ES6",
+    //指定使用的模块化规范
+    "module": "AMD",
+    //指定编译过程中需要引入的库文件的列表（不太会使用）
+    "lib": ["DOM"],
+    //用来指定编译后文件所在的目录
+    "outDir": "./dist",
+    //将编译的代码合并成一个文件
+    "outFile": "./dist/main.js"
+  }
+}
+```
+
+
+##### Continue updating...
+
+<div style="text-align:right;">2023/10/23 Oscar</div>
