@@ -138,6 +138,7 @@ let b: oneToSix;
 ##### tsconfig.json
 
 在项目的根目录下创建一个 ts 的配置文件 tsconfig.json。添加配置后，只需要 tsc 命令即可完成对整个项目的编译。
+
 ```json
 {
   //定义希望被编译文件所有的目录
@@ -148,6 +149,7 @@ let b: oneToSix;
   "extends": ["./config/base"],
   //指定需要编译文件的列表
   "files": ["one.ts", "two.ts", "three.ts", "four.ts"],
+
   "compilerOptions": {
     //指定ts编译的js目标版本
     "target": "ES6",
@@ -163,7 +165,111 @@ let b: oneToSix;
 }
 ```
 
+```json
+"compilerOptions": {  //严格的代码规范检查
+    //设置编译后的文件是否使用严格模式
+    "alwaysStrict": true,
+    //不允许隐式的any类型
+    "noImplicitAny": true,
+    //严格的检查空值
+    "strictNullChecks": true,
+    //所有严格的总开关
+    "strict": false
+  }
+```
 
-##### Continue updating...
+##### class 类
 
-<div style="text-align:right;">2023/10/23 Oscar</div>
+```ts
+class Person {
+  name: string;
+  static location: 'BJUT'; //static属于类，不属于类的实例
+  readonly age: number; //只读
+  constructor(name: string) {
+    this.name = name;
+  }
+}
+var zcl = new Person('zcl'); //也可以写做var zcl = new Person;
+class Wzt extends Person {
+  constructor(name: string) {
+    //子类不写构造方法，父类将自动调用。
+    super(name); //如果子类写构造方法，则会把父类构造方法覆盖。所以必须调用父类的构造函数，即super()
+  }
+}
+```
+
+##### abstract 抽象类
+
+```ts
+abstract class Animal {
+  //抽象类没有实例，专门用来被继承。
+  name: string = '抽象类';
+  abstract sleep(): void; //抽象方法没有方法体
+}
+class Dog extends Animal {
+  bark() {} //子类继承抽象类，必须重写抽象类中的全部抽象方法
+}
+```
+
+##### ts 接口
+
+```ts
+interface myInterface {
+  name: string;
+  age: number;
+  sayHello(): void;
+}
+//在定义类时，可以使类去实现一个接口
+//实现接口就是使类满足接口的要求
+class whatever implements myInterface {
+  name: string; //必须包含接口中的内容
+  age: number;
+  constructor(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+  sayHello() {
+    console.log(this.name);
+  }
+}
+```
+
+##### 属性封装
+
+属性修饰符
+
+- public：修饰的属性可以在任意位置访问（修改），是默认值
+- private: 私有属性，私有属性只能在类内部进行访问（修改）
+- protected: 受保护的属性，只能在当前类和当前类的子类中访问（修改）
+
+属性存取器 getter setter
+
+```ts
+class Person {
+  private name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
+  get name() {
+    return this.name;
+  }
+  set name(name: string) {
+    this.name = name;
+  }
+}
+console.log(p1.name); // 通过getter读取name属性
+p1.name = 'zcl'; // 通过setter修改name属性
+```
+
+##### 泛型
+
+```ts
+function cache<T, P>(value1: T, value2: P): T {
+  return T;
+}
+cache<string, number>('123', 456);
+```
+
+##### The end...
+
+<div style="text-align:right;">2023/10/25 Oscar</div>
