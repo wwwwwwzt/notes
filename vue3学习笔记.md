@@ -37,7 +37,7 @@ export default defineComponent({
 
 ##### setup() (没太明白)
 
-新的组件选项，在创建组件实例时，在 beforeCreate 之前执行(一次)。setup 方法是在 components, props, data, Methods, Computed, Lifecycle, methods 之前执行。
+&emsp;&emsp;新的组件选项，在创建组件实例时，在 beforeCreate 之前执行(一次)。setup 方法是在 components, props, data, Methods, Computed, Lifecycle, methods 之前执行。此组件对象还没有创建,this 是 undefined。可以通过 getCurrentInstance 这个函数来返回当前组件的实例对象，也就是当前 vue 这个实例对象。`const {proxy}:any = getCurrentInstance();`
 
 ```ts
 //如果在setup中返回值是一个对象，对象中的属性或方法，模版中可以直接使用
@@ -48,6 +48,26 @@ setup(){
   }
 }
 ```
+
+&emsp;&emsp;setup()的返回值一般都返回一个对象：为模版提供数据，也就是模版中可以直接使用此对象中的所有属性方法。
+返回对象中属性会与 data 函数返回对象的属性合并为组件对象的属性。返回对象中的方法会与 methods 中的方法合并成功组件对象的方法。
+
+##### ref
+
+```ts
+//接受一个内部值并返回一个响应式且可变的 ref 对象。
+const msg=ref('xdclass');
+//通过 val.value方法返回的这个ref对象中的值
+console.log(val.value);
+//在模版中使用
+//直接使用val即可，
+<template>{{val}}<template/>
+```
+
+##### reactive
+
+`const proxy=reactive(obj)`接收一个普通对象然后返回该普通对象的响应式代理器对象。
+​ 响应式转换是“深层的”：会影响对象内部所有的嵌套的属性。
 
 ##### vscode 功能用户代码片段
 
