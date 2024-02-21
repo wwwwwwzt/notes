@@ -35,7 +35,7 @@ export default defineComponent({
 </script>
 ```
 
-##### setup() (没太明白)
+##### setup()
 
 &emsp;&emsp;新的组件选项，在创建组件实例时，在 beforeCreate 之前执行(一次)。setup 方法是在 components, props, data, Methods, Computed, Lifecycle, methods 之前执行。此组件对象还没有创建,this 是 undefined。可以通过 getCurrentInstance 这个函数来返回当前组件的实例对象，也就是当前 vue 这个实例对象。`const {proxy}:any = getCurrentInstance();`
 
@@ -68,6 +68,14 @@ console.log(val.value);
 
 `const proxy=reactive(obj)`接收一个普通对象然后返回该普通对象的响应式代理器对象。
 ​ 响应式转换是“深层的”：会影响对象内部所有的嵌套的属性。
+
+##### setup 的参数
+
+props：是一个对象，里面有父级组件向子级组件传递的数据，并且是在子级组件中使用 props 接收到的所有属性，并且获取到的数据将保持响应性。
+context
+attrs：它是绑定到组件中的 非 props 数据，并且是非响应式的。
+emit：vue2 中的 this.$emit();
+slot：是组件的插槽，同样也不是响应式的。
 
 ##### vscode 功能用户代码片段
 
