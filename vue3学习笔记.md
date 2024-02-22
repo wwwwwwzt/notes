@@ -52,7 +52,9 @@ setup(){
 &emsp;&emsp;setup()的返回值一般都返回一个对象：为模版提供数据，也就是模版中可以直接使用此对象中的所有属性方法。
 返回对象中属性会与 data 函数返回对象的属性合并为组件对象的属性。返回对象中的方法会与 methods 中的方法合并成功组件对象的方法。
 
-##### ref
+##### ref 自动获取焦点
+
+ref 响应式类型是任意类型。这是它与 reactive 的明显区别。
 
 ```ts
 //接受一个内部值并返回一个响应式且可变的 ref 对象。
@@ -62,6 +64,24 @@ console.log(val.value);
 //在模版中使用
 //直接使用val即可，
 <template>{{val}}<template/>
+```
+
+```ts
+//自动获取焦点
+<template>
+  <input type="text"><br>
+  <input type="text" ref="inputRef">
+</template>
+
+setup(){
+    const inputRef=ref<HTMLElement|null>(null)
+    onMounted(()=>{
+        inputRef.value && inputRef.value.focus();
+    })
+    return{
+        inputRef
+    }
+}
 ```
 
 ##### reactive
@@ -76,6 +96,81 @@ context
 attrs：它是绑定到组件中的 非 props 数据，并且是非响应式的。
 emit：vue2 中的 this.$emit();
 slot：是组件的插槽，同样也不是响应式的。
+
+##### 生命周期钩子函数
+
+```ts
+setup(){  //vue3的生命周期函数写在setup中，比vue2的生命周期函数先执行
+  onBeforeMount(() => {});
+  onMounted(() => {});
+  onBeforeUpdate(() => {});
+  onUpdated(() => {});
+  onBeforeUnmount(() => {});
+  onUnmounted(() => {});
+}
+```
+
+##### computed
+
+```ts
+<template>
+  <input type="text" v-model="first" /><br />
+  <input type="text" v-model="second" /><br />
+  <input type="text" v-model="addUp" /><br />
+</template>
+setup() {
+    const first = ref<string>('');
+    const second = ref<string>('');
+    // const addUp = computed(() => {  两种写法皆可
+    //   return first.value + second.value;
+    // });
+    const addUp = computed({
+      get() {
+        return first.value + second.value;
+      },
+      set(val) {
+        first.value = val;
+        second.value = val;
+      },
+    });
+    return {first,second,addUp};
+  },
+```
+
+##### watch 监视器
+
+```ts
+const obj=reactive({
+    name:'Oscar',
+    courses:['ssm','javase','springboot']
+})
+//watch:第一个参数监视源(可以是一个数组，表示监视多个)
+//第二个参数回调函数
+//第三个参数watch配置项(immediate和deep)
+watch(obj,(value),{immediate:true}=>{
+    console.log(value);
+})
+```
+
+##### provide inject
+
+用来在爷孙组件中传值
+
+```ts
+//爷爷组件
+setup(){
+  const color = ref<string>("yellow");
+  provide("color",color);
+  function changeColor(val:string){
+    color.value = val;
+  }
+  return {color}
+}
+//孙子组件
+setup(){
+  const color = inject("color");
+}
+```
 
 ##### vscode 功能用户代码片段
 
@@ -103,4 +198,4 @@ slot：是组件的插槽，同样也不是响应式的。
 
 ##### Continue updating...
 
-<div style="text-align:right;">2023/10/25 Oscar</div>
+<div style="text-align:right;">2024/2/21 Oscar</div>
