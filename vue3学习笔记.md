@@ -172,6 +172,27 @@ setup(){
 }
 ```
 
+##### axios 配置
+```ts
+//axiosConfig.ts 文件
+import axios from "axios"
+const http = axios.create({
+
+});
+http.interceptors.request.use((req) => {
+  return req;
+})
+http.interceptors.response.use((res) => {
+    return res;
+})
+export default http;
+```
+```ts
+//main.ts 文件
+const app = createApp(App)
+app.config.globalProperties.$http = http;
+```
+
 ##### vscode 功能用户代码片段
 
 功能用户代码片段是 vscode 中的一个功能。下列代码写在 vue.json 这一文件中，表示它只对 vue 文件生效。输入 prefix 中的变量，即 ts 可以生成下面一段代码。其中的“$1”“$2”代表按下tab后会切换到哪里。“${2:test}”代表选中 test。
