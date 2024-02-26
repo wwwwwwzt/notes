@@ -37,7 +37,8 @@ export default defineComponent({
 
 ##### setup()
 
-&emsp;&emsp;新的组件选项，在创建组件实例时，在 beforeCreate 之前执行(一次)。setup 方法是在 components, props, data, Methods, Computed, Lifecycle, methods 之前执行。此组件对象还没有创建,this 是 undefined。可以通过 getCurrentInstance 这个函数来返回当前组件的实例对象，也就是当前 vue 这个实例对象。`const {proxy}:any = getCurrentInstance();`
+&emsp;&emsp;新的组件选项，在创建组件实例时，在 beforeCreate 之前执行(一次)。setup 方法是在 components, props, data, Methods, Computed, Lifecycle, methods 之前执行。此组件对象还没有创建,this 是 undefined。可以通过 getCurrentInstance 这个函数来返回当前组件的实例对象，也就是当前 vue 这个实例对象。
+`const {proxy}:any = getCurrentInstance();`
 
 ```ts
 //如果在setup中返回值是一个对象，对象中的属性或方法，模版中可以直接使用
@@ -173,24 +174,94 @@ setup(){
 ```
 
 ##### axios 配置
+
 ```ts
 //axiosConfig.ts 文件
-import axios from "axios"
-const http = axios.create({
-
-});
+import axios from 'axios';
+const http = axios.create({});
 http.interceptors.request.use((req) => {
   return req;
-})
+});
 http.interceptors.response.use((res) => {
-    return res;
-})
+  return res;
+});
 export default http;
 ```
+
 ```ts
 //main.ts 文件
-const app = createApp(App)
+const app = createApp(App);
 app.config.globalProperties.$http = http;
+```
+
+##### mockjs 设置
+
+```ts
+import Mock from 'mockjs';
+//设置请求延时
+Mock.setup({
+  timeout: '200-2000',
+});
+//三个参数 正则表达式url, 请求方法, 请求的回调函数
+Mock.mock(/\/api\/test/, 'get', (req: any) => {
+  return {
+    code: 0,
+    data: {
+      msg: '测试成功',
+    },
+  };
+});
+export default Mock;
+```
+
+在 main.ts 文件中，根据不同的 import 方式，有两种使用方法。这样 mock 才能被成功导入。
+
+```ts
+import Mock from './mock/mockConfig';
+Mock;
+const app = createApp(App);
+......
+```
+
+```ts
+import './mock/mockConfig';
+const app = createApp(App);
+......
+```
+
+##### 路由导航守卫 让用户必须登录
+
+```ts
+router.beforeEach((to, from, next) => {
+  const token = window.sessionStorage.getItem('token');
+  if (to.path === '/login') {
+    next();
+  } else {
+    if (token) {
+      next();
+    } else {
+      next('/login');
+    }
+  }
+});
+```
+
+##### 使用路由引入组件
+
+```ts
+{
+    path: '/home',
+    name: 'Home',
+    component: () => import('../components/Home/home.vue'),
+    redirect: '/homeTop',
+    children: [
+      {
+        path: '/homeTop',
+        name: 'HomeTop',
+        component: () => import('../components/Home/top.vue'),
+      },
+    ],
+  },
 ```
 
 ##### vscode 功能用户代码片段
