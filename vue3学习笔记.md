@@ -214,55 +214,141 @@ Mock.mock(/\/api\/test/, 'get', (req: any) => {
 export default Mock;
 ```
 
-在 main.ts 文件中，根据不同的 import 方式，有两种使用方法。这样 mock 才能被成功导入。
+- 在 main.ts 文件中，根据不同的 import 方式，有两种使用方法。这样 mock 才能被成功导入。
 
-```ts
-import Mock from './mock/mockConfig';
-Mock;
-const app = createApp(App);
-......
-```
+  ```ts
+  import Mock from './mock/mockConfig';
+  Mock;
+  const app = createApp(App);
+  ......
+  ```
 
-```ts
-import './mock/mockConfig';
-const app = createApp(App);
-......
-```
+  ```ts
+  import './mock/mockConfig';
+  const app = createApp(App);
+  ......
+  ```
 
-##### 路由导航守卫 让用户必须登录
+##### vue router
 
-```ts
-router.beforeEach((to, from, next) => {
-  const token = window.sessionStorage.getItem('token');
-  if (to.path === '/login') {
-    next();
-  } else {
-    if (token) {
+- 路由导航守卫 让用户必须登录
+
+  ```ts
+  router.beforeEach((to, from, next) => {
+    const token = window.sessionStorage.getItem('token');
+    if (to.path === '/login') {
       next();
     } else {
-      next('/login');
+      if (token) {
+        next();
+      } else {
+        next('/login');
+      }
     }
+  });
+  ```
+
+- 使用路由引入组件
+
+  ```ts
+  {
+      path: '/home',
+      name: 'Home',
+      component: () => import('../components/Home/home.vue'),
+      redirect: '/homeTop',
+      children: [
+        {
+          path: '/homeTop',
+          name: 'HomeTop',
+          component: () => import('../components/Home/top.vue'),
+        },
+      ],
+    },
+  ```
+
+- 跳转方式
+
+  ```html
+  <van-tabbar-item icon="home-o" to="homeTop">首页</van-tabbar-item>
+  ```
+
+  ```ts
+  const { proxy }: any = getCurrentInstance();
+  proxy.$router.push('/login');
+  ```
+
+##### vuex
+
+- 在组件中调用 vuex 中的方法
+
+  ```ts
+  import { useStore } from 'vuex';
+
+  const store = useStore();
+  function toCart(item: any) {
+    store.commit('toCart', item);
+    store.commit('getCart');
   }
-});
-```
+  ```
 
-##### 使用路由引入组件
+- 在 vuex 中存储数据
+  mutations 中的函数不会返回值，commit 方法并不会返回 mutations 中写的方法的返回值。它们只接受 state 和 payload（载荷，即传入的参数）作为参数，然后直接修改 state。
 
-```ts
-{
-    path: '/home',
-    name: 'Home',
-    component: () => import('../components/Home/home.vue'),
-    redirect: '/homeTop',
-    children: [
-      {
-        path: '/homeTop',
-        name: 'HomeTop',
-        component: () => import('../components/Home/top.vue'),
-      },
-    ],
+  ```ts
+  state: {
+      cartArray: [],
+    },
+  mutations: {  //添加商品到购物车
+    toCart(state: any, tag: any) {
+      const goods: any = state.cartArray.find((item: any) => item.id === tag.id);
+      if (goods) {
+        goods.count += 1;
+      } else {
+        const item = {
+          id: tag.id,
+          img: tag.img,
+          title: tag.details,
+          count: 1,
+        };
+        state.cartArray.push(item);
+      }
+    },  //查询商品
+    getCart(state: any) {
+      console.log(state.cartArray);
+    },
   },
-```
+  ```
+
+- getter
+  就像计算属性一样，getter 的返回值会根据它的依赖被缓存起来，且只有当它的依赖值发生了改变才会被重新计算
+  ```ts
+  getGoodsNum(state: any) {
+    let num = 0;
+    state.cartArray.forEach((item: any) => {
+      num += item.count;
+    });
+    return num;
+  },
+  ```
+
+##### 打包配置
+
+- vue.config.js
+  ```js
+  module.exports = {
+    publicPath: './',
+  };
+  ```
+- 修改路由为 hash 模式
+
+  ```ts
+  import { createRouter, createWebHashHistory } from 'vue-router';
+  const router = createRouter({
+    // history: createWebHistory(process.env.BASE_URL),
+    history: createWebHashHistory(process.env.BASE_URL),
+    routes,
+  });
+  ```
 
 ##### vscode 功能用户代码片段
 
@@ -287,7 +373,3 @@ router.beforeEach((to, from, next) => {
     "description": "Log output to console",
 },
 ```
-
-##### Continue updating...
-
-<div style="text-align:right;">2024/2/21 Oscar</div>
