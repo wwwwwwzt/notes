@@ -1,5 +1,76 @@
 # vue3 学习笔记
 
+##### vue
+
+- 核心功能：
+
+  - 声明式渲染：Vue 基于标准 HTML 拓展了一套模板语法，使得我们可以声明式地描述最终输出的 HTML 和 JavaScript 状态之间的关系。
+
+  - 响应性：Vue 会自动跟踪 JavaScript 状态并在其发生变化时响应式地更新 DOM。vue 使用虚拟 DOM+Diff 算法，只更新变化的 DOM 节点，复用不变的 DOM 节点。
+
+- 单文件组件
+  Vue 的单文件组件会将一个组件的逻辑 (JavaScript)，模板 (HTML) 和样式 (CSS) 封装在同一个文件里。单文件组件 (Single-File Components) 是 Vue 的标志性功能。
+
+- 选项式 API 和组合式 API
+
+  - 使用选项式 API，我们可以用包含多个选项的对象来描述组件的逻辑，例如 data、methods 和 mounted。选项所定义的属性都会暴露在函数内部的 this 上，它会指向当前的组件实例。选项式将响应性相关的细节抽象出来，并强制按照选项来组织代码，从而对初学者而言更为友好。
+    ```js
+    <script>
+    export default {
+      // data() 返回的属性将会成为响应式的状态，并且暴露在 this 上
+      data() {
+        return {...}
+      },
+      methods: {...},
+      mounted() {...}
+    }
+    </script>
+    ```
+  - 组合式 API 的核心思想是直接在函数作用域内定义响应式状态变量，并将从多个函数中得到的状态组合起来处理复杂问题。这种形式更加自由。
+
+    ```html
+    <script setup>
+      import { ref, onMounted } from 'vue';
+
+      const count = ref(0);
+      function increment() {
+        count.value++;
+      }
+      onMounted(() => {
+        console.log(`The initial count is ${count.value}.`);
+      });
+    </script>
+    ```
+
+- MVVM
+  ![](2024-02-28-23-37-55.png)
+  所以实例化的 Vue 一般被称作 VM，即 ViewModel。
+
+  ```js
+  let vm = new Vue({
+    el: #app,
+    data: {......}
+  })
+  ```
+
+- 数据代理（难） （可以去官方文档找找）
+  - 原理：使用 Object.defineProperty()通过一个对象代理另一个对象属性的读写
+  ```js
+  Object.defineProperty('目标对象', '代理属性', {
+    get() {             //当读取’目标对象‘的’代理属性‘时，getter就会被调用，且返回代理属性的值
+      return ......;
+    },
+    set(value) {        //当修改’目标对象‘的’代理属性‘时，setter就会被调用，且收到修改的值
+      ......;
+    },
+  });
+  ```
+  - 实现
+    <img src="2024-02-29-00-05-06.png" style="zoom:30%"/>
+    通过Object.defineProperty()把 data 中的属性添加到vm对象上，每个属性都有setter/getter。通过vm对象代理 data/_data 中属性的读写。
+    比如`{{msg}}`而不是`{{vm.msg}}`，更加方便的读写vue中data的数据。
+    
+
 ##### main.js
 
 项目的主入口文件 src/main.js
