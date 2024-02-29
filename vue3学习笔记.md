@@ -67,9 +67,60 @@
   ```
   - 实现
     <img src="2024-02-29-00-05-06.png" style="zoom:30%"/>
-    通过Object.defineProperty()把 data 中的属性添加到vm对象上，每个属性都有setter/getter。通过vm对象代理 data/_data 中属性的读写。
-    比如`{{msg}}`而不是`{{vm.msg}}`，更加方便的读写vue中data的数据。
-    
+    通过 Object.defineProperty()把 data 中的属性添加到 vm 对象上，每个属性都有 setter/getter。通过 vm 对象代理 data/\_data 中属性的读写。
+    比如`{{msg}}`而不是`{{vm.msg}}`，更加方便的读写 vue 中 data 的数据。
+
+##### v-on
+
+- 阻止默认事件
+  **js** 中的阻止默认事件
+
+  ```html
+  <a herf="https://......" @click="func">跳转</a>
+  <script>
+    methods:{
+      func(event){
+        event.preventDefault()
+      }
+    }
+  </script>
+  ```
+
+  **vue** 中的阻止默认事件
+
+  ```html
+  <a herf="https://......" @click.prevent="func">跳转</a>
+  <script>
+    methods:{
+      func(){
+        ......
+      }
+    }
+  </script>
+  ```
+
+- 阻止事件冒泡
+  如果不用@click.stop，那么点击这个 a 标签将触发两次 func 函数，也就是事件冒泡。.stop 和.prevent 可以连用。
+
+  ```html
+  <div @click="func">
+    <a herf="https://......" @click.stop="func">跳转</a>
+    <a herf="https://......" @click.stop.prevent="func">跳转</a>
+  </div>
+  <script>
+    methods:{
+      func(){
+        ......
+      }
+    }
+  </script>
+  ```
+
+- 只触发一次事件
+  `@click.once="func"`只有第一次点击标签会触发，后面再点就没用了。
+
+- 键盘事件
+  `@keyup.enter="showMessge"`点击回车触发。
 
 ##### main.js
 
@@ -208,6 +259,17 @@ setup() {
     return {first,second,addUp};
   },
 ```
+
+当只读时可以简写
+
+```ts
+const addUp = computed(() => {
+  return first.value + second.value;
+});
+```
+
+计算属性优点：有缓存的机制，可以复用，效率高，调试方便。
+有多个地方使用同一个计算属性，当值改变时，计算属性有缓存的机制，只会更新一次。
 
 ##### watch 监视器
 
