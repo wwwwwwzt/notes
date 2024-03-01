@@ -54,7 +54,9 @@
   ```
 
 - 数据代理（难） （可以去官方文档找找）
+
   - 原理：使用 Object.defineProperty()通过一个对象代理另一个对象属性的读写
+
   ```js
   Object.defineProperty('目标对象', '代理属性', {
     get() {             //当读取’目标对象‘的’代理属性‘时，getter就会被调用，且返回代理属性的值
@@ -65,10 +67,13 @@
     },
   });
   ```
+
   - 实现
     <img src="2024-02-29-00-05-06.png" style="zoom:30%"/>
     通过 Object.defineProperty()把 data 中的属性添加到 vm 对象上，每个属性都有 setter/getter。通过 vm 对象代理 data/\_data 中属性的读写。
     比如`{{msg}}`而不是`{{vm.msg}}`，更加方便的读写 vue 中 data 的数据。
+
+- 被 vue 管理的函数都应写成普通函数。不被 vue 管理的（定时器，ajax 回调函数，promise 回调函数）最好写成箭头函数。（没有完全理解）
 
 ##### v-on
 
@@ -121,6 +126,89 @@
 
 - 键盘事件
   `@keyup.enter="showMessge"`点击回车触发。
+
+##### class 样式的动态绑定
+
+```css
+.bg {
+  background-color: red;
+}
+.fs {
+  font-size: 30px;
+}
+```
+
+- 字符串写法
+
+  ```html
+  <div :class="bg">小滴课堂</div>
+  ```
+
+- 对象写法
+
+  ```html
+  <div :class="obj">小滴课堂</div>
+  obj:{bg: true, fs: true}
+  ```
+
+- 数组写法
+
+  ```html
+  <div :class="list">小滴课堂</div>
+  list:['bg', 'fs'] //数组中是字符串
+  ```
+
+- 也可以搞点花样（下面两种写法等价）
+
+  ```html
+  <div :class="[trueOrFalse? classA:'', classB]" />
+  <div :class="[{classA: trueOrFalse}, classB]" />
+  ```
+
+##### style 样式的动态绑定
+
+不用 vue 的写法`<div style="{font-size:30px; color:blue}" />`
+用 vue 的写法`<div :style="{fontSize:'30px',color:'blue'}" />`，将 css 变成对象。
+
+##### 条件渲染
+
+- v-if v-else-if v-else
+  不展示时直接移除 DOM 元素，适合切换频率低的场景
+  需要连用，中间不能放其他标签。
+- v-show
+  不展示时使用样式隐藏，适合切换频率高的场景
+
+一般来说，v-if 有更高的切换开销，而 v-show 有更高的初始渲染开销。
+如果需要非常频繁地切换，则使用 v-show 较好；如果在运行时条件很少改变，则使用 v-if 较好。
+
+##### 列表渲染
+
+- v-for 遍历数组
+  使用 item in items 形式的特殊语法（也可以 in 换成 of），其中 items 是源数据数组，而 item 则是被迭代的数组元素的别名。
+  `<li v-for="(item,index) in list">{{item.name}}-{{index}}</li>`
+
+- 遍历对象
+  三个参数为：值 键名 索引
+  `<li v-for="(value,name,index) in obj">{{index}}：{{name}}：{{value}}</li>`
+
+##### 维护状态 key 的作用和原理
+
+`<li v-for="(item,index) in list" :key="index">{{item.name}}<input type="text" /></li>`
+
+- 添加赵六进入数组`list.unshift({name:'赵六'})`。通过观察后方的 input 可以看出，前三个 li 标签没有变化，他们还是之前的 DOM 节点，只不过其中的内容变了。由第二张图可以看出，DOM 加入了新 li 节点 key=4，前三个节点没有变。
+  ![](2024-03-02-00-38-21.png)
+  ![](2024-03-02-00-44-34.png)
+- 为了给 Vue 一个提示，以便它能跟踪每个节点的身份，从而重用和重新排序现有元素，你需要为每项提供一个唯一 key。改成下面的写法，给每个对象加一个 id，就能让 vue 明白每个节点的身份。
+  `<li v-for="(item,index) in obj" :key="item.id">{{item.name}}</li>`
+  ```js
+  obj: [
+      { name: '张三', id: '1' },
+      { name: '李四', id: '2' },
+      { name: '王五', id: '3' },
+    ],
+  ```
+  - key 值使用 index，或者不加 key 值，在数组元素顺序打乱时，会产生不必要的 DOM 更新以及界面效果出问题。
+  - key 主要用在 Vue 虚拟 DOM（类似 js 对象格式的数据） 的 Diff 算法，新旧虚拟 DOM 对比，复用不变的旧节点，渲染改变的节点，提高渲染速度
 
 ##### main.js
 
@@ -274,16 +362,68 @@ const addUp = computed(() => {
 ##### watch 监视器
 
 ```ts
-const obj=reactive({
-    name:'Oscar',
-    courses:['ssm','javase','springboot']
-})
+const obj = reactive({
+  name: 'Oscar',
+  courses: ['ssm', 'javase', 'springboot'],
+});
 //watch:第一个参数监视源(可以是一个数组，表示监视多个)
 //第二个参数回调函数
 //第三个参数watch配置项(immediate和deep)
-watch(obj,(value),{immediate:true}=>{
+//其中，immediate表示obj在值在初始化的时候也执行回调函数
+watch(
+  obj, //也可以写成 'obj.name'，一定要写成字符串的形式，不然会报错
+  (value) => {
     console.log(value);
-})
+  },
+  { immediate: true }
+);
+```
+
+简写
+
+```js
+watch:{
+  isSunny(){
+    this.plan = this.isSunny ? 'go out' : 'stay home';
+  },
+}
+```
+
+##### 对比 computed 与 watch
+
+- vue 的作者认为 watch 会被滥用，监视属性是命令式且重复的。
+- 计算属性实现更加简洁明了。因此，两者都能实现的功能，优先选择使用 computed。
+- watch 能实现异步调用，computed 不能
+
+例子：使用 watch 和 computed 实现用搜索框 inputValue 搜索列表 list
+
+```js
+list: [
+  { name: '牛仔裤', price: '88元' },
+  { name: '运动裤', price: '67元' },
+  { name: '羽绒服', price: '128元' },
+  { name: '运动服', price: '100元' },
+],
+computed: { //定义计算属性newList
+  newList() {
+    return this.list.filter((i) => {
+      //indexOf() 用来查找的元素的位置
+      //不包含inputValue的对象的indexOf结果为-1
+      return i.name.indexOf(this.inputValue) !== -1;
+    });
+  },
+},
+watch:{
+  inputValue:{
+    immediate:true, //初始化组件时能够执行一次watch，
+    //indexOf('')的结果为0，这样就能把整个列表都显示出来
+    handler(value)=>{
+      this.newList = this.list.filter((i)=>{
+        return i.name.indexOf(value) !== -1
+      })
+    }
+  }
+}
 ```
 
 ##### provide inject
