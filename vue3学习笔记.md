@@ -69,7 +69,7 @@
   ```
 
   - 实现
-    <img src="2024-02-29-00-05-06.png" style="zoom:30%"/>
+    <img src="2024-02-29-00-05-06.png" style="zoom:30%;"/>
     通过 Object.defineProperty()把 data 中的属性添加到 vm 对象上，每个属性都有 setter/getter。通过 vm 对象代理 data/\_data 中属性的读写。
     比如`{{msg}}`而不是`{{vm.msg}}`，更加方便的读写 vue 中 data 的数据。
 
@@ -167,7 +167,7 @@
 
 ##### style 样式的动态绑定
 
-不用 vue 的写法`<div style="{font-size:30px; color:blue}" />`
+不用 vue 的写法`<div style="font-size:30px; color:blue;" />`
 用 vue 的写法`<div :style="{fontSize:'30px',color:'blue'}" />`，将 css 变成对象。
 
 ##### 条件渲染
@@ -209,6 +209,32 @@
   ```
   - key 值使用 index，或者不加 key 值，在数组元素顺序打乱时，会产生不必要的 DOM 更新以及界面效果出问题。
   - key 主要用在 Vue 虚拟 DOM（类似 js 对象格式的数据） 的 Diff 算法，新旧虚拟 DOM 对比，复用不变的旧节点，渲染改变的节点，提高渲染速度
+
+##### 数据的更新问题
+
+- 通过普通对象添加属性方法，Vue 不能监测到且不是响应式。
+  下面的例子中，obj.age 渲染不出来，应该使用以下两种方法。
+
+  ```js
+  {{obj.name}}  {{obj.age}}
+  obj:{name:'wzt'}
+  add(){
+    this.obj.age= '23';
+    this.$set(this.obj,'age','22');
+    Vue.set(this.obj,'age','22');
+  }
+  ```
+
+- 直接通过数组索引值改变数组的数据，Vue 监测不到改变。因为在 vue 中数组并没有跟对象一样封装有监测数据变化的 getter、setter。如果写成`this.list[0].name = 'zcl'`是可以的，但是写成`this.list[0] = { name: '李四',age: 20 };`vue 监测不到。
+  Vue 在数组的原始操作方法（js 提供的）上包裹了重新解析模板的方法（vue 封装过的）。这 7 个函数会改变原数组，因此他们被封装过。其他不改变原数组的函数就没必要封装了，例如 filter()。
+  push() pop() shift() unshift() splice() sort() reverse()
+
+##### 其他 v- 指令
+
+- v-text `<p v-text="name">123</p>`
+  有点类似{{}}，在所在节点渲染文本内容，但是会替换节点中现有的内容（例子中的 123）
+- v-html `<p v-html="str"></p>`
+  str 字符串里写的是 html，在所在节点渲染 html 结构的内容，替换节点所在的所有内容。在网站上动态渲染任意 HTML 是非常危险的，因为容易导致 XSS 攻击（注入恶意指令代码到网页）。
 
 ##### main.js
 
@@ -309,6 +335,25 @@ emit：vue2 中的 this.$emit();
 slot：是组件的插槽，同样也不是响应式的。
 
 ##### 生命周期钩子函数
+
+创建---挂载---更新---销毁
+![](2024-03-03-00-23-48.png)
+
+1. 如果在 beforeCreate()中 console.log(this)，得到的结果不一定是真实的。console.log(this)可能是在其他时期执行的。在后面写一个`debugger;`可以解决这个问题。
+2. 在 beforeMount 阶段页面可以展示内容，但是是未编译。比如直接显示为`{{var}}`这个样子。此时可以操作 DOM，但是操作其实并未实际生效。因为操作会在虚拟 DOM 转为真实 DOM 的过程中被覆盖。
+3. 如果没有 el 选项时，需要使用 vm.$mount(el)。el 选项就是下面这个东西。
+   脚手架创建的项目的这行代码中，mount('#app')应该也是这个用途。`app.use(store).use(router).use(vant).mount('#app');`
+   ```js
+   var app = new Vue({
+     el: '#app',
+     data: {...},
+   });
+   ```
+
+<img src="./2024-03-03-00-45-20.png" style="zoom:40%;"/>
+<img src="./2024-03-03-00-48-02.png" style="zoom:40%;"/>
+
+beforeDestroy 时，数据、方法可以访问但是不触发更新。
 
 ```ts
 setup(){  //vue3的生命周期函数写在setup中，比vue2的生命周期函数先执行
