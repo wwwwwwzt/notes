@@ -236,40 +236,53 @@
 - v-html `<p v-html="str"></p>`
   str 字符串里写的是 html，在所在节点渲染 html 结构的内容，替换节点所在的所有内容。在网站上动态渲染任意 HTML 是非常危险的，因为容易导致 XSS 攻击（注入恶意指令代码到网页）。
 
-##### main.js
+##### vue cli
 
-项目的主入口文件 src/main.js
+node_modules 项目的安装依赖
+public 放置静态资源文件
+src 项目的主入口文件夹
+babel.config.js ES6 语法编译成 ES5 语法
+package-lock.json 记录了当前项目所有模块的具体来源和版本号以及其他的信息
+package.json 记录当前项目所依赖模块的版本信息
 
-```ts
-//根据传入的组件生成一个对应的vue实例
-import { createApp } from 'vue';
-//所有组件的父级组件
-import App from './App.vue';
+- main.js
+  项目的主入口文件 src/main.js
 
-//将实例对象挂载到指定标签下
-createApp(App).mount('#app');
-```
+  ```ts
+  //根据传入的组件生成一个对应的vue实例
+  import { createApp } from 'vue';
+  //所有组件的父级组件
+  import App from './App.vue';
 
-##### App.vue
+  //将实例对象挂载到指定标签下
+  createApp(App).mount('#app');
+  ```
 
-```ts
-<template>
-  <!-- vue2组件html模板中必须有一个根标签<div/>，vue3中可以没有 -->
-</template>
-<script lang="ts">
-//defineComponent根据传入的配置对象，生成对应的组件
-import { defineComponent } from 'vue';
-//生成组件并暴露出去
-export default defineComponent({
-  //组件名称
-  name: 'App',
-  //注册子组件
-  components: {
-    HelloWorld,
-  },
-});
-</script>
-```
+- App.vue
+  项目中所有组件的父组件。
+
+  ```ts
+  <template>
+    <!-- vue2组件html模板中必须有一个根标签<div/>，vue3中可以没有 -->
+  </template>
+  <script lang="ts">
+  //defineComponent根据传入的配置对象，生成对应的组件
+  import { defineComponent } from 'vue';
+  //生成组件并暴露出去
+  export default defineComponent({
+    //组件名称
+    name: 'App',
+    //注册子组件
+    components: {
+      HelloWorld,
+    },
+  });
+  </script>
+  ```
+
+- vue.config.js
+  想要查看 vue-cli 的配置，可以通过`vue inspect > output.js`生成 output.js 文件。
+  如果想要修改 vue-cli 的配置，可以新建 vue.config.js 文件，在其中修改配置。如何修改应该参考https://cli.vuejs.org/zh/config/
 
 ##### setup()
 
@@ -342,7 +355,7 @@ slot：是组件的插槽，同样也不是响应式的。
 1. 如果在 beforeCreate()中 console.log(this)，得到的结果不一定是真实的。console.log(this)可能是在其他时期执行的。在后面写一个`debugger;`可以解决这个问题。
 2. 在 beforeMount 阶段页面可以展示内容，但是是未编译。比如直接显示为`{{var}}`这个样子。此时可以操作 DOM，但是操作其实并未实际生效。因为操作会在虚拟 DOM 转为真实 DOM 的过程中被覆盖。
 3. 如果没有 el 选项时，需要使用 vm.$mount(el)。el 选项就是下面这个东西。
-   脚手架创建的项目的这行代码中，mount('#app')应该也是这个用途。`app.use(store).use(router).use(vant).mount('#app');`
+   脚手架创建的项目的这行代码中，mount('#app')也是这个用途。`app.use(store).use(router).use(vant).mount('#app');`
    ```js
    var app = new Vue({
      el: '#app',
@@ -470,6 +483,206 @@ watch:{
   }
 }
 ```
+
+##### 组件基础
+
+- 模块与组件
+  模块：一般指一个 js 文件，提取公共或逻辑复杂的 js 代码。用来复用 js 代码、提高代码的复用率。
+  模块化：当项目中的 js 都用模块来编写，那这个项目就是模块化的。
+  组件：实现局部功能、逻辑的代码合集（html、css、js、image、map4）
+  组件化：当项目中的功能或者页面都以组件的形式来去编写，那么这个项目就是组件化的。
+
+- 组件的全局注册和局部注册
+  - 全局注册
+    data 必须是个函数，如果是个对象那么其他地方引用这个组件的时候会出问题。
+    不写 el 选项（一个项目中所有的组件最终都由一个 vm 实例管理）
+    ```js
+    Vue.component('test-component', {
+      data() {
+        return {};
+      },
+      template: '...',
+    });
+    ```
+  - 局部注册
+    ```js
+    const cmp = Vue.extend({
+      data() {
+        return {...};
+      },
+      template: '...',
+    });
+    new Vue({
+      components: {cmp: cmp}
+    })
+    ```
+- 父向子传值
+  props 的数据时单向的，只能从父组件传到子组件
+  props 的数据不可更改，如果要更改需备份到 data 中做操作.
+  `<son-component :msg="123"/>`
+
+  ```js
+  props: {
+    msg: {
+      type: String,
+      required: true,
+      default:'你好',
+    },
+  },
+  ```
+
+- 子向父传值
+  - 父组件通过 props 传给子组件事件回调传值
+  ```js
+  //父组件
+  <son :transmit="transmit" />
+  method:{
+    transmit(i){
+      this.xxx = i;
+    }
+  }
+  //子组件
+  props: ["transmit"],
+  mounted() {
+    this.transmit(this.var1);
+  }
+  ```
+  - @绑定到自定义事件上
+  ```js
+  <son @event="handler" />
+  method:{
+    handler(i){
+      this.xxx = i;
+    }
+  }
+  //子组件
+  mounted() {
+    this.$emit('event',this.var1);
+  }
+  ```
+  - 自定义事件（ref 绑定：灵活，延时效果）
+  ```js
+  // 父组件
+  <son ref="child" />
+  mounted() {
+    this.$refs.child.$on("event", this.func1);//func1在methods声明或者用箭头函数
+  },
+  // 子组件
+  methods: {
+    func2() {
+      this.$emit("event", this.var1);
+    },
+  },
+  ```
+  - 事件解绑
+  ```js
+  beforeDestroy(){
+    this.$off()
+  }
+  ```
+- 兄弟组件的数据操作
+  将一个子组件的数据放在父组件维护（状态提升）。
+  操作声明在父组件，传到另一个子组件就可实现兄弟组件间的数据操作。
+- 任意组件的事件
+  - 首先安装全局事件总线
+  ```js
+  new Vue({
+    beforeCreate(){
+      Vue.prototype.$bus = this
+    }
+    ...
+  })
+  ```
+  - 在需要接收数据的组件绑定自定义事件`this.$bus.$on('xx',this.handler)`
+  - 在提供数据的组件`this.$bus.$emit('xx',数据)`
+  - 在绑定自定义事件的组件解绑`beforeDestroy() {this.$bus.$off();}`
+
+##### slot 插槽
+
+slot 是父子组件通讯的一种方式，可以在子组件指定的节点插入 html 内容。
+
+- 默认插槽
+
+  ```html
+  <slotComponent>
+    <span>123</span>
+  </slotComponent>
+  <!-- 子组件 -->
+  <template>
+    <div>
+      <h1></h1>
+      <p>
+        <slot></slot>
+      </p>
+    </div>
+  </template>
+  ```
+
+- 具名插槽：有多个 html 内容需要指定插入到子组件的对应节点
+
+  ```html
+  <slotComponent>
+    <template v-slot:title>
+      <span>123</span>
+    </template>
+    <template v-slot:website>
+      <span>abc</span>
+    </template>
+  </slotComponent>
+  <!-- 子组件 -->
+  <template>
+    <div>
+      <h1>
+        <slot name="title"></slot>
+      </h1>
+      <p>
+        <slot name="website"></slot>
+      </p>
+    </div>
+  </template>
+  ```
+
+  v-slot:title 只能写在 template 标签以及组件上。
+  可以写成 `<span slot='title'>123</span>` 但是此用法在 vue3 被弃用。
+
+- 作用域插槽：数据定义在子组件，但是数据需要在父组件的插槽中使用。
+  ```html
+  <slotComponent>
+    <template v-slot="{ list }">
+      <li v-for="(i, index) in list" :key="index">{{ i }}</li>
+    </template>
+  </slotComponent>
+  <!-- 子组件 list是他data中的数据 -->
+  <template>
+    <div>
+      <slot :list="list"></slot>
+    </div>
+  </template>
+  ```
+
+##### mixin 混入
+
+- mixin 是一种非常灵活的方式，来分发 Vue 组件中的可复用功能。一个混入对象可以包含任意组件选项。当组件使用混入对象时，所有混入对象的选项将被“混合”进入该组件本身的选项
+- 局部混入
+  ```js
+  // 新建mixin.js文件
+  export const myMixin = {
+    data() {
+      return {...};
+    },
+    mounted() {...},
+  };
+  // 需要混入的组件
+  import { myMixin } from "../mixin";
+  mixins: [myMixin],
+  ```
+- 全局混入 （谨慎使用，因为会使实例以及每个组件受影响）
+  ```js
+  // main.js
+  import { myMixin } from './mixin';
+  Vue.mixin(myMixin);
+  ```
+- 当组件和混入对象含有同名选项时，这些选项将进行“合并”。在选项发生冲突时以组件数据优先。
 
 ##### provide inject
 
