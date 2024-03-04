@@ -762,6 +762,44 @@ export default Mock;
 
 ##### vue router
 
+- 创建路由配置文件
+
+  ```js
+  // router/index.js
+  import VueRouter from 'vue-router';
+  import Home from '../components/Home';
+  import Course from '../components/Course';​
+  export default new VueRouter({
+    routes: [{path: '/home', component: Home,},
+      {path: '/course', component: Course,},
+    ],
+  });
+  ```
+
+- main.js 引入应用
+  ```js
+  import VueRouter from 'vue-router';
+  import router from './router/index';
+  ​
+  Vue.use(VueRouter)​
+  new Vue({
+    ...
+    router: router,
+  });
+  ```
+- 展示路由
+  `<router-view></router-view>` 有点像`<slot/>`
+- 跳转方式
+  `<router-link active-class='active' to='/home'>首页<router-link>` 或者
+  `<van-tabbar-item icon="home-o" to="homeTop">首页</van-tabbar-item>`
+
+  ```ts
+  const { proxy }: any = getCurrentInstance();
+  proxy.$router.push('/login');
+  ```
+
+  跳转之后之前的组件就 destory 了。
+
 - 路由导航守卫 让用户必须登录
 
   ```ts
@@ -795,17 +833,6 @@ export default Mock;
         },
       ],
     },
-  ```
-
-- 跳转方式
-
-  ```html
-  <van-tabbar-item icon="home-o" to="homeTop">首页</van-tabbar-item>
-  ```
-
-  ```ts
-  const { proxy }: any = getCurrentInstance();
-  proxy.$router.push('/login');
   ```
 
 ##### vuex
