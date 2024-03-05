@@ -11,6 +11,7 @@
 - 单文件组件
   Vue 的单文件组件会将一个组件的逻辑 (JavaScript)，模板 (HTML) 和样式 (CSS) 封装在同一个文件里。单文件组件 (Single-File Components) 是 Vue 的标志性功能。
 
+- Vue3 优点： 1.更小的打包体积和内存 2.页面第一次的渲染速度和更新速度更快 3.更好的支持 TypeScript 4.新增了组合式 API 和内置组件
 - 选项式 API 和组合式 API
 
   - 使用选项式 API，我们可以用包含多个选项的对象来描述组件的逻辑，例如 data、methods 和 mounted。选项所定义的属性都会暴露在函数内部的 this 上，它会指向当前的组件实例。选项式将响应性相关的细节抽象出来，并强制按照选项来组织代码，从而对初学者而言更为友好。
@@ -219,14 +220,14 @@
   {{obj.name}}  {{obj.age}}
   obj:{name:'wzt'}
   add(){
-    this.obj.age= '23';
-    this.$set(this.obj,'age','22');
-    Vue.set(this.obj,'age','22');
+    this.obj.age= '23';   //Vue 监测不到
+    this.$set(this.obj,'age','22'); //Vue 能监测到
+    Vue.set(this.obj,'age','22');   //Vue 能监测到
   }
   ```
 
 - 直接通过数组索引值改变数组的数据，Vue 监测不到改变。因为在 vue 中数组并没有跟对象一样封装有监测数据变化的 getter、setter。如果写成`this.list[0].name = 'zcl'`是可以的，但是写成`this.list[0] = { name: '李四',age: 20 };`vue 监测不到。
-  Vue 在数组的原始操作方法（js 提供的）上包裹了重新解析模板的方法（vue 封装过的）。这 7 个函数会改变原数组，因此他们被封装过。其他不改变原数组的函数就没必要封装了，例如 filter()。
+  Vue 在数组的原始操作方法（js 提供的）上包裹了重新解析模板的方法（vue 封装过的），让他们能被检测到。这 7 个函数如下所示。其他不改变原数组的函数就没必要封装了，例如 filter()。
   push() pop() shift() unshift() splice() sort() reverse()
 
 ##### 其他 v- 指令
@@ -286,8 +287,10 @@ package.json 记录当前项目所依赖模块的版本信息
 
 ##### setup()
 
-&emsp;&emsp;新的组件选项，在创建组件实例时，在 beforeCreate 之前执行(一次)。setup 方法是在 components, props, data, Methods, Computed, Lifecycle, methods 之前执行。此组件对象还没有创建,this 是 undefined。可以通过 getCurrentInstance 这个函数来返回当前组件的实例对象，也就是当前 vue 这个实例对象。
-`const {proxy}:any = getCurrentInstance();`
+- 新的组件选项，在创建组件实例时，在 beforeCreate 之前执行(一次)。
+- setup 方法是在 components, props, data, Methods, Computed, Lifecycle, methods 之前执行。
+- 此组件对象还没有创建,this 是 undefined。
+- 可以通过 getCurrentInstance 这个函数来返回当前组件的实例对象，也就是当前 vue 这个实例对象。`const {proxy}:any = getCurrentInstance();`
 
 ```ts
 //如果在setup中返回值是一个对象，对象中的属性或方法，模版中可以直接使用
@@ -302,9 +305,19 @@ setup(){
 &emsp;&emsp;setup()的返回值一般都返回一个对象：为模版提供数据，也就是模版中可以直接使用此对象中的所有属性方法。
 返回对象中属性会与 data 函数返回对象的属性合并为组件对象的属性。返回对象中的方法会与 methods 中的方法合并成功组件对象的方法。
 
-##### ref 自动获取焦点
+##### setup 的参数
+
+props：是一个对象，里面有父级组件向子级组件传递的数据，并且是在子级组件中使用 props 接收到的所有属性，并且获取到的数据将保持响应性。
+context
+attrs：它是绑定到组件中的 非 props 数据，并且是非响应式的。
+emit：vue2 中的 this.$emit();
+slot：是组件的插槽，同样也不是响应式的。
+
+##### ref
 
 ref 响应式类型是任意类型。这是它与 reactive 的明显区别。
+基本类型数据的响应式是通过 Object.defineProperty() 实现
+对象类型数据的响应式是通过 ES6 中的 Proxy 实现
 
 ```ts
 //接受一个内部值并返回一个响应式且可变的 ref 对象。
@@ -316,36 +329,37 @@ console.log(val.value);
 <template>{{val}}<template/>
 ```
 
-```ts
-//自动获取焦点
-<template>
-  <input type="text"><br>
-  <input type="text" ref="inputRef">
-</template>
+- 自动获取焦点
 
-setup(){
-    const inputRef=ref<HTMLElement|null>(null)
-    onMounted(()=>{
-        inputRef.value && inputRef.value.focus();
-    })
-    return{
-        inputRef
-    }
-}
-```
+  ```ts
+
+  <template>
+    <input type="text"><br>
+    <input type="text" ref="inputRef">
+  </template>
+
+  setup(){
+      const inputRef=ref<HTMLElement|null>(null)
+      onMounted(()=>{
+          inputRef.value && inputRef.value.focus();
+      })
+      return{
+          inputRef
+      }
+  }
+  ```
 
 ##### reactive
 
+reactive()：定义一个对象类型的响应式数据（不能处理基本类型数据）
 `const proxy=reactive(obj)`接收一个普通对象然后返回该普通对象的响应式代理器对象。
 ​ 响应式转换是“深层的”：会影响对象内部所有的嵌套的属性。
 
-##### setup 的参数
-
-props：是一个对象，里面有父级组件向子级组件传递的数据，并且是在子级组件中使用 props 接收到的所有属性，并且获取到的数据将保持响应性。
-context
-attrs：它是绑定到组件中的 非 props 数据，并且是非响应式的。
-emit：vue2 中的 this.$emit();
-slot：是组件的插槽，同样也不是响应式的。
+- reactive 与 ref 的不同
+  - 处理数据类型不同： ref 可以处理基本类型和对象（数组）类型数据，reactive 只能处理对象（数组）类型数据。
+  - 实现原理不同：ref 处理基本类型数据通过 `Object.defineProperty()` 实现，reactive 通过 `Proxy` 实现。
+  - 操作不同：ref 操作数据需要加 `.value`
+  - 组件数据多时更加趋向使用 reactive。
 
 ##### 生命周期钩子函数
 
@@ -776,48 +790,7 @@ export default Mock;
   });
   ```
 
-- main.js 引入应用
-  ```js
-  import VueRouter from 'vue-router';
-  import router from './router/index';
-  ​
-  Vue.use(VueRouter)​
-  new Vue({
-    ...
-    router: router,
-  });
-  ```
-- 展示路由
-  `<router-view></router-view>` 有点像`<slot/>`
-- 跳转方式
-  `<router-link active-class='active' to='/home'>首页<router-link>` 或者
-  `<van-tabbar-item icon="home-o" to="homeTop">首页</van-tabbar-item>`
-
-  ```ts
-  const { proxy }: any = getCurrentInstance();
-  proxy.$router.push('/login');
-  ```
-
-  跳转之后之前的组件就 destory 了。
-
-- 路由导航守卫 让用户必须登录
-
-  ```ts
-  router.beforeEach((to, from, next) => {
-    const token = window.sessionStorage.getItem('token');
-    if (to.path === '/login') {
-      next();
-    } else {
-      if (token) {
-        next();
-      } else {
-        next('/login');
-      }
-    }
-  });
-  ```
-
-- 使用路由引入组件
+  第二个例子：
 
   ```ts
   {
@@ -835,9 +808,137 @@ export default Mock;
     },
   ```
 
+- main.js 引入应用
+  ```js
+  import VueRouter from 'vue-router';
+  import router from './router/index';
+  ​
+  Vue.use(VueRouter)​
+  new Vue({
+    ...
+    router: router,
+  });
+  ```
+- 展示路由
+  `<router-view></router-view>` 有点像`<slot/>`
+- 跳转
+
+  - 标签跳转
+    `<router-link active-class='active' to='/home'>首页<router-link>` 或者
+    `<van-tabbar-item icon="home-o" to="homeTop">首页</van-tabbar-item>`
+  - 编程式导航
+    ```ts
+    const { proxy }: any = getCurrentInstance();
+    proxy.$router.push('/login');
+    //push()和replace()中传入的参数就是标签跳转中to=""中的内容
+    proxy.$router.push({ path: '/course/front', query: { text: text } });
+    proxy.$router.replace({ path: '/course/front', query: { text: text } });
+    ```
+
+- 路由的前进后退
+  replace:删除路由之前的历史记录
+  `<router-link replace to="/course/back" active-class="active">`
+  `proxy.$router.replace({ path: '/course/front', query: { text: text } });`
+
+  ```js
+  this.$router.forward(); //前进
+  this.$router.back(); //后退
+  this.$router.go(); //前进：正数1、2 或者后退：负数-1、-2
+  ```
+
+- 路由缓存
+  跳转之后之前的组件就 destory 销毁了。路由缓存可以让不展示的路由组件保持挂载在页面，不被销毁。
+  ```html
+  <!-- componentXXX 是组件的名字，可以指定某一个组件不被销毁 -->
+  <keep-alive include="componentXXX">
+    <router-view></router-view>
+  </keep-alive>
+  ```
+- 路由导航守卫 让用户必须登录
+  例子 1 是简单写法，只能去登陆，其他地方不能去。例子 2 是高级写法，规定了那些地方不登陆也能去。
+
+  ```ts
+  router.beforeEach((to, from, next) => {
+    const token = window.sessionStorage.getItem('token');
+    if (to.path === '/login') {
+      next();
+    } else {
+      if (token) {
+        next();
+      } else {
+        next('/login');
+      }
+    }
+  });
+  ```
+
+  ```js
+  { //在路由配置中给页面加上`meta:{isAuth:true}`
+    path: 'front',
+    component: Front,
+    meta: { isAuth: true },
+  },
+  router.beforeEach((to, from, next) => {
+    if (to.meta.isAuth) {
+      //同上，校验是否登陆
+    } else {
+      next();
+    }
+  });
+  ```
+
+##### 路由传参
+
+- query 传参（对应 path 和?）
+
+  ```html
+  传字符串的时候，可以使用模版字符串
+  <router-link :to="`/course/front?text=${text}`" />
+  传对象的时候，写在query中
+  <router-link :to="{ path: '/course/front', query: { text: text } }" />
+  ```
+
+  在子组件中获取`this.$route.query.text`
+
+- params 传参（对应 name 和:）
+  字符串形式传参时需加占位符告知路由器，在路径后面是参数
+  ```js
+  {
+    name: 'qianduan',
+    path: 'front/:text', //字符串形式传参时需加占位符告知路由器，在路径后面是参数
+    component: Front,
+  },
+  ```
+  ```html
+  传字符串的时候，可以使用模版字符串
+  <router-link :to="`/course/front/${text}`" />
+  传对象的时候，写在params中
+  <router-link :to="{ name: 'qianduan', params: { text: text } }" />
+  ```
+  在子组件中获取`this.$route.params.text`
+
 ##### vuex
 
+Vuex：是集中式存储管理应用的所有组件的状态（数据），可实现任意组件之间的通讯。
+特点： 1.当不同的组件需要对同一个状态进行读写时，或者复用的状态较多，可以使用 vuex。 2.能够保持数据和页面是响应式的 3.便于开发和后期数据维护
+
+- store/index.js 文件
+  ```js
+  import Vuex from 'vuex'
+  Vue.use(Vuex)            //应用
+  ​
+  export default new Vuex.Store({
+    actions:{},            //异步，接受用户的事件
+    mutations:{},          //只能通过mutations操作state中的数据
+    state:{},              //存放共享的数据
+    getters: {}            //对 state 数据进行加工
+  })
+  ```
+  state 只能通过 mutations 配置的方法去修改
+  mutations 必须是同步函数
+  actions 能够提供 dispatch 方法实现异步操作。actions 中再调用 mutations 里的方法修改 state。
 - 在组件中调用 vuex 中的方法
+  `this.$store.dispatch("add", value); `
 
   ```ts
   import { useStore } from 'vuex';
@@ -877,15 +978,17 @@ export default Mock;
   },
   ```
 
-- getter
+- getter：对 state 数据进行加工
   就像计算属性一样，getter 的返回值会根据它的依赖被缓存起来，且只有当它的依赖值发生了改变才会被重新计算
   ```ts
-  getGoodsNum(state: any) {
-    let num = 0;
-    state.cartArray.forEach((item: any) => {
-      num += item.count;
-    });
-    return num;
+  getters: {  //cartArray是个复杂的对象数组，记录了购物车中的内容。getGoodsNum()用来加工出商品总数量
+    getGoodsNum(state: any) {
+      let num = 0;
+      state.cartArray.forEach((item: any) => {
+        num += item.count;
+      });
+      return num;
+    },
   },
   ```
 
