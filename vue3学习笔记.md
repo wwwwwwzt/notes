@@ -160,7 +160,6 @@
   ```
 
 - 也可以搞点花样（下面两种写法等价）
-
   ```html
   <div :class="[trueOrFalse? classA:'', classB]" />
   <div :class="[{classA: trueOrFalse}, classB]" />
@@ -307,11 +306,32 @@ setup(){
 
 ##### setup 的参数
 
-props：是一个对象，里面有父级组件向子级组件传递的数据，并且是在子级组件中使用 props 接收到的所有属性，并且获取到的数据将保持响应性。
-context
-attrs：它是绑定到组件中的 非 props 数据，并且是非响应式的。
-emit：vue2 中的 this.$emit();
-slot：是组件的插槽，同样也不是响应式的。
+- props：是一个对象，里面有父级组件向子级组件传递的数据，并且是在子级组件中使用 props 接收到的所有属性，并且获取到的数据将保持响应性。
+
+  ```js
+  export default {
+    props: ['test'], //需要props声明才能在setup收到参数
+    setup(props) {
+      console.log(props.test);
+    },
+  };
+  ```
+
+- context：上下文对象，一般用来触发自定义事件。
+  ```js
+  export default {
+    emits: ['event'], //需要emits声明才能在setup中使用
+    setup(props, context) {
+      function test() {
+        context.emit('event', '123123');
+      }
+      return { test };
+    },
+  };
+  ```
+  attrs：它是绑定到组件中的 非 props 数据，并且是非响应式的。
+  emit：vue2 中的 this.$emit();
+  slot：是组件的插槽，同样也不是响应式的。
 
 ##### ref
 
@@ -361,9 +381,32 @@ reactive()：定义一个对象类型的响应式数据（不能处理基本类�
   - 操作不同：ref 操作数据需要加 `.value`
   - 组件数据多时更加趋向使用 reactive。
 
+##### toRef 与 toRefs
+
+- toRef：创建一个 ref 对象，其 value 值指向另一个对象中指定的属性。用来将某个响应式对象的某一个属性提供给外部使用。
+  `const name = toRef(person, "name");`或者
+  ```js
+  return{
+    name: toRef(data,'name');
+    age: toRef(data,'age');
+  }
+  ```
+- toRefs：批量创建多个 ref 对象，其 value 值指向另一个对象中指定的属性
+  ```js
+  setup() {
+    let person = reactive({
+      name: "张三",
+      age: 19,
+    });
+    return {  //扩展运算符将person对象中的所有属性提供给外部
+      ...toRefs(person),
+    };
+  },
+  ```
+
 ##### 生命周期钩子函数
 
-创建---挂载---更新---销毁
+创建---挂载---更新---销毁/卸载（vue2/vue3）
 ![](2024-03-03-00-23-48.png)
 
 1. 如果在 beforeCreate()中 console.log(this)，得到的结果不一定是真实的。console.log(this)可能是在其他时期执行的。在后面写一个`debugger;`可以解决这个问题。
@@ -382,8 +425,9 @@ reactive()：定义一个对象类型的响应式数据（不能处理基本类�
 
 beforeDestroy 时，数据、方法可以访问但是不触发更新。
 
-```ts
+```js
 setup(){  //vue3的生命周期函数写在setup中，比vue2的生命周期函数先执行
+  //beforeCreate、created 合成了 setup()
   onBeforeMount(() => {});
   onMounted(() => {});
   onBeforeUpdate(() => {});
@@ -444,22 +488,39 @@ const obj = reactive({
 //其中，immediate表示obj在值在初始化的时候也执行回调函数
 watch(
   obj, //也可以写成 'obj.name'，一定要写成字符串的形式，不然会报错
-  (value) => {
-    console.log(value);
+  (newValue, oldValue) => {
+    console.log(newValue);
   },
   { immediate: true }
 );
 ```
 
-简写
+- _Vue 在监听整个 reactive 对象的 oldValue 的时候可能存在 bug_
 
-```js
-watch:{
-  isSunny(){
-    this.plan = this.isSunny ? 'go out' : 'stay home';
-  },
-}
-```
+- 简写
+  ```js
+  watch:{
+    isSunny(){
+      this.plan = this.isSunny ? 'go out' : 'stay home';
+    },
+  }
+  ```
+- 监听对象中的一个基本类型属性
+  ```js
+  watch(
+    () => numObj.a, //写成回调函数
+    (newValue, oldValue) => {
+      console.log('numObj变化了', newValue, oldValue);
+    }
+  );
+  ```
+- 监听对象中的某几个属性
+  ```js
+  watch([() => obj.a, () => obj.b], (newValue, oldValue) => {
+    console.log('obj变化了', newValue, oldValue);
+  });
+  ```
+- 如果监听 reactive 定义的对象，深度监听是强制开启的，无法关闭（vue3 配置）
 
 ##### 对比 computed 与 watch
 
@@ -497,6 +558,25 @@ watch:{
   }
 }
 ```
+
+##### watchEffect
+
+watchEffect：在监听的回调函数中使用了属性，则监听该属性，不用在参数上指明监听哪个属性。
+
+```js
+watchEffect(() => {
+  let var1 = numa.value;
+  let var2 = numb.value;
+  console.log('watchEffect函数执行了');
+});
+```
+
+- 与 watch 的区别
+  - watch 手动添加定向的监听属性
+  - watchEffect 自动监听使用到的属性
+  - watchEffect 会初始化执行一次，相当于`immediate:true`
+
+建议开发中使用 watch 监听，逻辑简单、依赖属性少的场景可以使用 watchEffect
 
 ##### 组件基础
 
