@@ -505,6 +505,32 @@ async function request() {
 }
 ```
 
+##### 闭包
+
+- 全局上下⽂ window
+- 函数上下⽂
+  函数执⾏的时候会形成⾃⼰的上下⽂(环境，对象)。
+  函数执⾏结束的时候函数上下⽂就会销毁。
+- 闭包：有权访问另⼀个函数作⽤域中的变量的函数。是通过调⽤函数时返回其内部的函数。
+  JavaScript 变量属于本地或全局作⽤域。全局变量能够通过闭包实现局部（私有），也就是只有调⽤函数才能改变变量。
+- 闭包的副作⽤：产⽣内存泄漏。⽐如说我本来要销毁函数的上下⽂，被强⾏保存下来了，保存在内存当中。
+
+```js
+function test() {
+  let count = 0;
+  return function inner() {//这就是闭包
+    count++;
+    console.log(count);
+  };
+}
+let add = test();
+console.log(add); | 打印出来的是闭包函数
+// ƒ inner() {
+//   count++;
+//   console.log(count);
+// }
+```
+
 ##### The End...
 
 <div style="text-align:right;">2023/10/16 Oscar</div>
