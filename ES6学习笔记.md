@@ -4,7 +4,6 @@
 
 - ECMA Script 语法标准
 - DOM 通过文档模型 dom 操作网页
-- 
 - BOM 通过浏览器模型 bom 操作浏览器
 
 ##### 解释/编译：
@@ -31,8 +30,8 @@
 
 ##### var let const
 
-- var：函数作用域
-- let：块级作用域。没有变量提升。暂时性死区（声明前不可用）。
+- var：函数作用域。 有变量提升。
+- let：块级作用域。没有变量提升，即暂时性死区（声明前不可用）。
 - const：同 let。变量声明的同时立即赋值。如果是简单类型则不可改变。
 
 ```js
@@ -45,14 +44,31 @@ if (true) {
 console.log(a, b, c);
 ```
 
-##### Symbol（没完全理解）
+##### 数据类型
 
 - 原始类型数据：Number String Boolean Null Undefined Symbol
 - 复杂类型数据：Object
 
-&emsp;&emsp;对象的属性名容易产生命名冲突，为保证键名的唯一性，故 es6 引入 Symbol 这种新的原始类型数据，确保创建的每个变量都是独一无二的。
-&emsp;&emsp;也可以用来定义常量。
-&emsp;&emsp;由于 Symbol 函数返回的值是原始类型的数据，不是对象，故 Symbol 函数前不能使用 new 命令，否则会报错。
+- Undefined：没初始化的变量就是 undefined。undefended 唯一有用的事情就是 typeof。有意思的是，没声明和没初始化的变量都`typeof == undefined`。
+- null：表示一个空指针对象，`typeof null == object`。有趣的是，`null == undefined`。
+- number：
+  - 浮点数
+    ```js
+    //由于浮点数的精度高达17位，在计算中很不精准。
+    //例如a=0.1，b=0.2，c却可能是0.30000000000004
+    if (a + b == 0.3) {
+      console.log('0.3');
+    }
+    ```
+  - NaN `NaN == NAN 结果为false`变量
+    `isNaN(NaN)`或者`isNaN(转换不成数字的)`返回值为 true
+  - Infinity `5/0会返回Infinity 5/-0会返回-Infinity`
+  - `Number(null) == 0` `Number(undefined) == NaN`
+  - parseInt() parseFloat()较 Number()更为常用。如果第一个非空格字符不是数字、加减号，则直接返回 NaN。因此`parseInt(null) == NaN`，与 Number()不同。
+- Symbol  
+  &emsp;&emsp;对象的属性名容易产生命名冲突，为保证键名的唯一性，故 es6 引入 Symbol 这种新的原始类型数据，确保创建的每个变量都是独一无二的。
+  &emsp;&emsp;也可以用来定义常量。
+  &emsp;&emsp;由于 Symbol 函数返回的值是原始类型的数据，不是对象，故 Symbol 函数前不能使用 new 命令，否则会报错。
 
 ```js
 let school1 = Symbol('bjut');
