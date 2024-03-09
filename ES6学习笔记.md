@@ -25,8 +25,17 @@
 
 ##### 栈内存 / 堆内存：
 
-&emsp;Js 分为栈内存和堆内存。栈内存用来存放基础类型的数据 number boolean string null symbol undefined，堆内存存放复杂类型：对象、数组。
+&emsp;Js 分为栈内存和堆内存。栈内存用来存放基础类型的数据（也叫原始值） number boolean string null symbol undefined，堆内存存放复杂类型（也叫引用值）：对象。
 ![](2023-10-10-17-16-36.png)
+
+- 复制值的时候，原始值的两个变量互不干扰`let num1 = 5,num2 = num1`
+- 复制值的时候，引用值复制的实际上是一个指针，指向存储在堆内存中的对象。操作完成后，两个变量实际上指向同一个对象。
+
+###### 函数传递参数
+
+- 所有函数都是按值传递的。函数外部的值会被复制到函数内部的参数中。这样，函数外部的参数和函数内部的参数都指向同一个对象。所以，在函数内修改对象中的内容，会影响函数外部。
+- 但是当函数内部的参数被重新定义为一个新的对象时`obj = new Object()`，他实际上就指向了一个新的 object。而函数外的变量依旧指向原来的 object，不会被影响。
+- 这说明对象在函数中也是按值传递的，而不是按引用传递。
 
 ##### var let const
 
@@ -65,16 +74,26 @@ console.log(a, b, c);
   - Infinity `5/0会返回Infinity 5/-0会返回-Infinity`
   - `Number(null) == 0` `Number(undefined) == NaN`
   - parseInt() parseFloat()较 Number()更为常用。如果第一个非空格字符不是数字、加减号，则直接返回 NaN。因此`parseInt(null) == NaN`，与 Number()不同。
-- Symbol  
-  &emsp;&emsp;对象的属性名容易产生命名冲突，为保证键名的唯一性，故 es6 引入 Symbol 这种新的原始类型数据，确保创建的每个变量都是独一无二的。
-  &emsp;&emsp;也可以用来定义常量。
-  &emsp;&emsp;由于 Symbol 函数返回的值是原始类型的数据，不是对象，故 Symbol 函数前不能使用 new 命令，否则会报错。
+- String
+  - 模板字面量 + 字符串插值 \`${var1}\`
+- Symbol：对象的属性名容易产生命名冲突，为保证键名的唯一性，故 es6 引入 Symbol 这种新的原始类型数据，确保创建的每个变量都是独一无二的。
+  ```js
+  let school1 = Symbol('bjut');
+  let school2 = Symbol('bjut');
+  console.log(school1 === school2); //false
+  ```
+  - 由于 Symbol 函数返回的值是原始类型的数据，不是对象，故 Symbol 函数前不能使用 new 命令，否则会报错。
+  - 也可以使用 Symbol.for()来全局的定义到全局符号注册表中。
+    ```js
+    let school1 = Symbol.for('bjut');
+    let school2 = Symbol.for('bjut');
+    console.log(school1 === school2); //true
+    ```
 
-```js
-let school1 = Symbol('bjut');
-let school2 = Symbol('bjut');
-console.log(school1 === school2); //false
-```
+##### for-in for-of
+
+for-in 用于枚举 object 中的非 Symbol 的“key” `for(const key in obj)`
+for-of 用于遍历可迭代的对象的元素。如 Array，String，Map，Set 等。`for (let value of arr)`
 
 ##### 解构复制
 
