@@ -30,12 +30,26 @@
 
 - 复制值的时候，原始值的两个变量互不干扰`let num1 = 5,num2 = num1`
 - 复制值的时候，引用值复制的实际上是一个指针，指向存储在堆内存中的对象。操作完成后，两个变量实际上指向同一个对象。
- 
+
 ###### 函数传递参数
 
 - 所有函数都是按值传递的。函数外部的值会被复制到函数内部的参数中。这样，函数外部的参数和函数内部的参数都指向同一个对象。所以，在函数内修改对象中的内容，会影响函数外部。
 - 但是当函数内部的参数被重新定义为一个新的对象时`obj = new Object()`，他实际上就指向了一个新的 object。而函数外的变量依旧指向原来的 object，不会被影响。
 - 这说明对象在函数中也是按值传递的，而不是按引用传递。
+
+##### 执行上下文栈和作用域链
+
+- 执行上下文就是当前 JavaScript 代码被解析和执行时所在环境, JS 执行上下文栈可以认为是一个存储函数调用的栈结构。
+- 当一段 JavaScript 代码在运行的时候，它实际上是运行在执行上下文中。
+
+  - JavaScript 执行在单线程上，所有的代码都是排队执行。
+  - 浏览器执行全局的代码时，首先创建全局的执行上下文，压入执行栈的顶部。
+  - 每个函数会在执行的时候创建自己的执行上下文，并且把它压入执行栈的顶部。这个上下文就是
+  - 通常说的 “本地上下文”。当前函数执行完毕并退出的时候，其上下文也从栈中弹出并销毁。
+  - 主程序退出，全局执行上下文从执行栈中弹出。此时栈中所有的上下文都已经弹出，程序执行完毕。
+
+- 作用域链
+  函数执行所需要的变量在当前作用域中找不到的时候，它就会一层一层向上查找，一直找到全局作用域。这种一层一层的关系，就是作用域链。
 
 ##### var let const
 
@@ -89,6 +103,39 @@ console.log(a, b, c);
     let school2 = Symbol.for('bjut');
     console.log(school1 === school2); //true
     ```
+
+##### 原型链
+
+JavaScript 是动态的，本身不提供一个 class 的实现。即便是在 ES6 中引入了 class 关键字，但那也只是语法糖，JavaScript 仍然是基于原型的。
+
+当谈到继承时，JavaScript 只有一种结构：对象。每个实例对象（object）都有一个私有属性（称之为 \_\_proto\_\_）指向它的构造函数的原型对象（prototype）。该原型对象也有一个自己的原型对象（\_\_proto\_\_），层层向上直到一个对象的原型对象为 null。根据定义，null 没有原型，并作为这个原型链中的最后一个环节。
+
+- 原型
+  在 JavaScript 中，每个函数对象都有一个 prototype 属性，这个属性指向函数的原型对象。使用原型对象的好处是所有对象实例共享它所包含的属性和方法。
+- 原型链
+  每个对象拥有一个原型对象，通过 \_\_proto\_\_ (double underscore proto) 指向其原型对象，并从中继承方法和属性。同时原型对象也可能拥有原型，这样一层一层，最终指向 null(Object.prototype.\_\_proto\_\_ 指向的是 null)。这种关系被称为原型链。通过原型链，一个对象可以拥有定义在其他对象中的属性和方法。
+  \_\_proto\_\_ 翻译做隐式原型链。因为一般双下划线开头并结尾的属性和方法是不希望被直接使用和操作的，这种属性通常称它为隐式。
+- prototype 和 \_\_proto\_\_
+  prototype 是构造函数的属性。
+  \_\_proto\_\_ 是每个实例都有的属性，指向其原型对象。
+  实例的 \_\_proto\_\_ 与其构造函数的 prototype 指向的是同一个对象。
+
+  ```js
+  function Person() {}
+  var person = new Person();
+  console.log(person.__proto__ === Person.prototype); //true
+  ```
+
+- constructor
+  每个原型都有一个 constructor 属性指向关联的构造函数。
+
+  ```js
+  function Person() {}
+  console.log(Person === Person.prototype.constructor); //true
+  ```
+
+- 原型对象也可能拥有原型，这样一层一层，最终指向 null。
+  <img src="2024-03-11-17-28-45.png" style="zoom:40%"/>
 
 ##### for-in for-of
 
@@ -543,6 +590,8 @@ async function request() {
 
 ##### 闭包
 
+闭包是指有权访问另一个函数作用域中的变量的函数，创建闭包最常用的方式就是在一个函数内部创建另一个函数。闭包可以读取到另个一函数内部的变量，让这些变量的值始终保存在内存中。
+
 - 全局上下⽂ window
 - 函数上下⽂
   函数执⾏的时候会形成⾃⼰的上下⽂(环境，对象)。
@@ -552,21 +601,27 @@ async function request() {
 - 闭包的副作⽤：产⽣内存泄漏。⽐如说我本来要销毁函数的上下⽂，被强⾏保存下来了，保存在内存当中。
 
 ```js
-function test() {
-  let count = 0;
-  return function inner() {//这就是闭包
-    count++;
-    console.log(count);
+var Counter = (function () {
+  var privateCounter = 0;
+  function changeBy(val) {
+    privateCounter += val;
+  }
+  return {
+    increment: function () {
+      changeBy(1);
+    },
+    decrement: function () {
+      changeBy(-1);
+    },
+    value: function () {
+      return privateCounter;
+    },
   };
-}
-let add = test();
-console.log(add); | 打印出来的是闭包函数
-// ƒ inner() {
-//   count++;
-//   console.log(count);
-// }
+})();
+console.log(Counter.value()); /* logs 0 */
+Counter.increment();
+console.log(Counter.value()); /* logs 1 */
+Counter.decrement();
+console.log(Counter.value()); /* logs 0 */
+console.log(Counter); //{increment: ƒ, decrement: ƒ, value: ƒ}
 ```
-
-##### The End...
-
-<div style="text-align:right;">2023/10/16 Oscar</div>
