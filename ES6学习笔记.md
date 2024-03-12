@@ -617,7 +617,7 @@ var Counter = (function () {
       return privateCounter;
     },
   };
-})();
+})(); //不加最后的括号，Counter就是个立即执行函数。加了括号后，就变成函数的返回值。
 console.log(Counter.value()); /* logs 0 */
 Counter.increment();
 console.log(Counter.value()); /* logs 1 */
