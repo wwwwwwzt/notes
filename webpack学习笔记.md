@@ -321,3 +321,46 @@ if (module.hot) {
   module.hot.accept();
 }
 ```
+
+##### 开发环境和生产环境
+
+开发环境和生产环境的构建目标差异很大。在开发环境中，我们需要具有强大的、具有实时重新加载或热模块替换能力和 localhost server。 而在生产环境中，我们的目标则转向于关注更小的 bundle，以及资源的优化，以改善加载时间。所以我们通常建议为每个环境编写彼此独立的 webpack 配置。
+使用 webpack-merge，将 webpack.config.js 拆分为三个文件。详见`videoPlayPage?id=22&eid=10103`
+
+- webpack.common.conf.js 是放一些我们公用的配置，比如入口 entry、出口 output、常用 loader 以及插件等。
+- webpack.dev.conf.js 是在开发环境上的配置，比如 devServer 配置、模块热替换等方便开发的配置
+- webpack.prod.conf.js 是在生产环境上的配置，比如提取分离 css、压缩 css 和 js 等
+
+##### 优化打包速度
+
+- 减少文件搜索范围
+
+  - resolve.extensions
+    在导入语句没带文件后缀时，Webpack 会自动带上后缀后去尝试询问文件是否存在。在配置 resolve.extensions 时，以下几点可以做到尽可能的优化构建性能：
+    `resolve:{extensions: ['js']},`
+
+    - 后缀尝试列表要尽可能的小，不要把项目中不可能存在的情况写到后缀尝试列表中。
+    - 频率出现最高的文件后缀要优先放在最前面，以做到尽快的退出寻找过程。
+    - 在源码中写导入语句时，要尽可能的带上后缀，从而可以避免寻找过程。例如在你确定的情况下把 require('./data') 写成 require('./data.json') 。
+
+  - resolve.modules
+    用于配置 Webpack 去哪些目录下寻找第三方模块。resolve.modules 的默认值是 ['node_modules']，会采用向上递归搜索的方式查找。
+    <img src="images/2024-03-14-17-35-39.png" style="zoom:50%;" />
+
+  - resolve.alias
+    resolve.alias 配置项通过别名来把原导入路径映射成一个新的导入路径。
+    `alias:{"assets":resolve('./public/assets')}`此时，assets 就是这串路径的别名。在其他文件中，`import './public/assets/index.css`等价于`import 'assets/index.css`
+
+  - include/exclude
+    选择需要处理的文件，排除掉不需要处理的文件。
+
+- noParse
+  `module:{noParse: /node_modules\/(element-ui\.js)/}`
+  防止 webpack 解析那些任何与给定正则表达式相匹配的文件。忽略的文件中不应该含有 import, require, define 的调用，或任何其他导入机制。忽略大型的 library 可以提高构建性能。比如 jquery、elementUI 等库。
+
+- 给 babel-loader 设置缓存
+  babel-loader 提供了 cacheDirectory 特定选项（默认 false）：设置时，给定的目录将用于缓存加载器的结果。
+  `use:{loader:'babel-loader?cacheDirectory-true'}`
+- happyPack
+  基本原理：在 webpack 构建过程中，我们需要使用 Loader 对 js，css，图片，字体等文件做转换操作，并且转换的文件数据量也是非常大的，且这些转换操作不能并发处理文件，而是需要一个个文件进行处理。HappyPack 将这部分任务分解到多个子进程中去并行处理，子进程处理完成后把结果发送到主进程中，从而减少总的构建时间。
+  文件少的时候性能反而会变差，需要考虑什么时候使用。
