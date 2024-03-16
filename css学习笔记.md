@@ -39,7 +39,7 @@ box-sizing:content-box // 标准盒模型，默认
 box-sizing:border-box  // 怪异盒模型
 ```
 
-##### BFC 块级格式化上下文
+##### BFC 块级格式化上下文 Block Formatting Context
 
 BFC 是页面盒模型布局中的一种 CSS 渲染模式，相当于一个独立的容器，里面的元素和外部的元素相互不影响。
 
@@ -75,3 +75,32 @@ BFC 是页面盒模型布局中的一种 CSS 渲染模式，相当于一个独�
   - overflow 的值是 hidden（**最常用**）、auto 或者 scroll，而不是 visible
   - position 的值为 absolute 或 fixed
   - display:table | inline-block | flex | grid
+
+##### CSS 实现三栏布局的几种方式
+
+- flex 布局
+  ```html
+  <div style="display: flex">
+    <div style="height: 50px; width: 50px;"></div>
+    <div style="flex: 1; height: 50px; width: 50px;"></div>
+    <div style="height: 50px; width: 50px;"></div>
+  </div>
+  ```
+- 浮动+margin
+  左右float 中间设置等于左右宽度的margin，自己不设width。
+  ```html
+  <div>
+    <div style="float:left; height: 50px; width: 50px;"></div>
+    <div style="margin:0 50px; height: 50px;"></div>
+    <div style="float:left; height: 50px; width: 50px;"></div>
+  </div>
+  ```
+- 浮动+BFC
+  左右float 中间开启BFC。
+  ```html
+  <div>
+    <div style="float:left; height: 50px; width: 50px;"></div>
+    <div style="overflow:hidden; height: 50px; width: 50px;"></div>
+    <div style="float:left; height: 50px; width: 50px;"></div>
+  </div>
+  ```
