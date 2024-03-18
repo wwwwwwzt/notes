@@ -17,12 +17,12 @@
 ##### css 的 link 标签放在头部，js 的 script 放在 body 底部
 
 - link 标签放在 head 标签中
-  - 用户访问网站时，代码是从上往下解析的，正常展示页面内容的样式，提高用户体验。这样浏览器一边下载 html 构建 DOM 树，一边下载 css 构建 css 树，然后两个合成为渲染树。
+  - 用户访问网站时，代码是从上往下解析的，正常展示页面内容的样式，提高用户体验。这样浏览器一边下载 html 构建 DOM 树，一边下载 css 构建 css 树（style rules），然后两个合成为渲染树（render tree），然后展示给用户。
   - 放在 html 结构底部时，加载页面会出现 html 结构混乱的情况。
 - script 标签放在 body 结束标签之前
   - JS 脚本在下载和执行期间会阻止 html 解析
   - 把 script 标签放在底部，保证 html 和 css 首先完成解析之后再加载 JS 脚本。
-  - script 标签加上 defer（推迟的意思）属性时，可以放在 head 标签中 （async）
+  - script 标签加上 **defer**（推迟的意思）属性时，可以放在 head 标签中 （async）
 
 ##### 提高搜索权重 SEO
 

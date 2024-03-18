@@ -76,6 +76,30 @@ BFC 是页面盒模型布局中的一种 CSS 渲染模式，相当于一个独�
   - position 的值为 absolute 或 fixed
   - display:table | inline-block | flex | grid
 
+##### flex
+
+```css
+/* ​父元素设置了flex布局，默认会给每个子元素开启缩小属性（flex-shrink:1;）
+当空间不够时，其他的元素会被挤压至隐藏。
+通过设置flex-shrink:0;来避免。*/
+display:flex
+
+/* 定义水平方向对齐方式 */
+justify-content: flex-start | flex-end | center | space-between | space-around;
+​
+/* 定义垂直方向对齐方式 */
+align-items: flex-start | flex-end | center | baseline | stretch;
+​
+/* 定义多个轴线（多行/多列）对齐方式 */
+align-content: flex-start | flex-end | center | space-between | space-around | stretch;
+
+/* 设置子元素 */
+flex:1 代表着
+flex-grow:1; //允许放大
+flex-shrink:1; //允许缩小
+flex-basis:0%;
+```
+
 ##### CSS 实现三栏布局的几种方式
 
 - flex 布局
@@ -87,7 +111,7 @@ BFC 是页面盒模型布局中的一种 CSS 渲染模式，相当于一个独�
   </div>
   ```
 - 浮动+margin
-  左右float 中间设置等于左右宽度的margin，自己不设width。
+  左右 float 中间设置等于左右宽度的 margin，自己不设 width。
   ```html
   <div>
     <div style="float:left; height: 50px; width: 50px;"></div>
@@ -96,7 +120,7 @@ BFC 是页面盒模型布局中的一种 CSS 渲染模式，相当于一个独�
   </div>
   ```
 - 浮动+BFC
-  左右float 中间开启BFC。
+  左右 float 中间开启 BFC。
   ```html
   <div>
     <div style="float:left; height: 50px; width: 50px;"></div>
@@ -104,3 +128,85 @@ BFC 是页面盒模型布局中的一种 CSS 渲染模式，相当于一个独�
     <div style="float:left; height: 50px; width: 50px;"></div>
   </div>
   ```
+
+##### CSS 中的预处理器
+
+less\sass\stylus
+
+- 什么是预处理器？
+
+  - 定义了专门的编程语言，增加了编程的特性，生成 CSS 文件
+  - CSS 代码更加简洁、适应性更强、可读性更佳，更易于代码的维护等
+
+- 预处理器的能力
+  - 嵌套反映层级和约束
+  - 变量和计算减少重复代码
+  - extend 和 mixin 代码片段
+  - 循环适用于复杂有规律的样式
+  - import css 文件模块化
+
+##### 让盒子水平垂直居中
+
+```html
+<div class="a">
+  <div class="b"></div>
+</div>
+```
+
+- 利用 flex 弹性盒子
+  ```css
+  .a{   //父元素设置flex和居中
+    display:flex
+    justify-content:center; //水平
+    align-items:center;  //垂直
+  }
+  ```
+- position+margin
+  ```css
+  .a {
+    ......
+    position: relative;
+  }
+  .b {
+    ......
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+  }
+  ```
+- position
+  ```css
+  .a {
+    ......
+    position: relative;
+  }
+  .b {
+    ......
+    position: absolute;
+    top: 50%;
+    left: 50%;  //此时，b类元素的左上角在正中间，但需要把中心移到最中间
+    transform: translate(-50%, -50%);
+  }
+  ```
+
+##### css 移动端的适配
+
+- 安装 postcss-pxtorem，自动将 px 转换成 rem 单位的插件。px 是一个绝对值，会让页面在不同移动端设备中很不一样。rem 是相对值，可以缓解这一问题。
+- 安装 amfe-flexible，自动检测当前设备屏幕宽度 serveWidth，设置 html 里面的 font-size 为 serveWidth/10
+
+##### 重绘和重排
+
+![]()<image src="images/2024-03-18-10-31-47.png" style="zoom:40%;"/>
+
+- 重绘(repaint)：当元素的外观、背景、颜色等改变，浏览器会根据元素的新属性重新绘制，使元素呈现新的外观叫做重绘。
+- 重排(reflow)：当渲染树一部分或者全部因为大小或者边距而改变，需要渲染树重新计算的过程叫做重排。
+- 重绘不一定需要重排，重排必然导致重绘。
+- 避免：
+  - 在元素的显示隐藏上尽量用 opacity 替代 visibility（重绘）
+  - 元素定位时使用 transform 代替 top、left（重排）
+  - 尽量不使用 table 布局，因为一个小的改动会造成整个 table 重新布局（重排）
+  - 减少直接操作 DOM 元素（重排）
+  - 为元素添加类，样式都在类中改变（重绘）
