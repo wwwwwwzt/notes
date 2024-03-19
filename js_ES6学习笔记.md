@@ -169,6 +169,17 @@ JavaScript 是动态的，本身不提供一个 class 的实现。即便是在 E
 - 原型对象也可能拥有原型，这样一层一层，最终指向 null。
   <img src="2024-03-11-17-28-45.png" style="zoom:40%"/>
 
+##### 判断数组的方式
+
+```js
+arr instanceof Array;
+Array.isArray(arr);
+Array.prototype.isPrototypeOf(arr);
+arr.constructor === Array;
+Object.prototype.toString.call(arr).slice(8, -1) === 'Array'; //这玩意会返回一个数组[object Array]
+未完待续;
+```
+
 ##### 深拷贝
 
 `JSON.parse(JSON.stringify(obj))`
