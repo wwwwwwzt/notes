@@ -19,6 +19,7 @@ https://github.com/yuanyuanbyte/Blog?tab=readme-ov-file
 | ---- | ------- | -------- |
 | 3/19 | HTML    | 10       |
 | 3/19 | js 基础 | 3        |
+| 3/20 | js 基础 | 3        |
 
 ### 面试官
 

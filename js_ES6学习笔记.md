@@ -134,6 +134,13 @@ console.log(a, b, c);
     console.log(school1 === school2); //true
     ```
 
+##### [] == ![] 类型转换
+
+<img src="images/2024-03-20-23-15-40.png" style="zoom:30%"/>
+
+为什么[] == ![]的结果为 true：
+  - 因为
+
 ##### 原型链
 
 JavaScript 是动态的，本身不提供一个 class 的实现。即便是在 ES6 中引入了 class 关键字，但那也只是语法糖，JavaScript 仍然是基于原型的。
@@ -176,8 +183,8 @@ arr instanceof Array;
 Array.isArray(arr);
 Array.prototype.isPrototypeOf(arr);
 arr.constructor === Array;
-Object.prototype.toString.call(arr).slice(8, -1) === 'Array'; //这玩意会返回一个数组[object Array]
-未完待续;
+Object.prototype.toString.call(arr).slice(8, -1) === 'Array';
+//这玩意会返回一个数组[object Array] 神奇
 ```
 
 ##### 深拷贝
