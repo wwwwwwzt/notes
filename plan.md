@@ -20,6 +20,7 @@ https://github.com/yuanyuanbyte/Blog?tab=readme-ov-file
 | 3/19 | HTML    | 10       |
 | 3/19 | js 基础 | 3        |
 | 3/20 | js 基础 | 3        |
+| 3/21 | js 基础 | 6        |
 
 ### 面试官
 
@@ -44,6 +45,7 @@ https://leetcode.cn/problemset/javascript/
 | 日期 | 今日完成 | 总计 |
 | ---- | -------- | ---- |
 | 3/19 | 5        | 5    |
+| 3/21 | 3        | 8    |
 
 ### 视频课
 

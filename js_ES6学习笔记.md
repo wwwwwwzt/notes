@@ -134,12 +134,23 @@ console.log(a, b, c);
     console.log(school1 === school2); //true
     ```
 
-##### [] == ![] 类型转换
+##### 大坑！ 类型转换
 
+<img src="images/2024-03-21-11-45-12.png" style="zoom:40%"/>
 <img src="images/2024-03-20-23-15-40.png" style="zoom:30%"/>
 
-为什么[] == ![]的结果为 true：
-  - 因为
+- 为什么[] == ![]的结果为 true：
+
+  - !的优先级高于==，先计算![]
+  - 因为引用类型转 boolean 都是 true，所以![]就是 false
+  - ==运算会把大家转成 number 类型进行比较，[]转数字等于 0
+
+- 为什么[] == []的结果为 false：引用类型数据存在堆内存中，栈内存中存储的是地址，所以他们的结果是 false。
+
+- 为什么{} == !{}的结果为 true：
+  - {}.valueOf().toString() 得到字符串'[object Object]'
+  - !{} = false
+  - Number('[object Object]') == Number(false) 不成立，因为转换到最后 是 NaN 和 0 比较，所以结果为 false
 
 ##### 原型链
 
@@ -176,7 +187,7 @@ JavaScript 是动态的，本身不提供一个 class 的实现。即便是在 E
 - 原型对象也可能拥有原型，这样一层一层，最终指向 null。
   <img src="2024-03-11-17-28-45.png" style="zoom:40%"/>
 
-##### 判断数组的方式
+##### 判断是否为数组的方式
 
 ```js
 arr instanceof Array;
@@ -323,13 +334,15 @@ let obj = {                   let obj={
 
 ##### Object 方法
 
-```js
-Object.is(a, b) 代替===符号的写法。唯一的不同是，NaN===NaN会判断为false，而Object.is(NaN, NaN)会返回true。
-Object.assign(target,  source) 把source对象传入target对象.
-Object.keys(object) 返回一个包含所有属性的数组
-Object.values(object) 返回一个包含所有属性值的数组
-Object.entries(object) 把对象变为数组 //[['name','wzt'],['age',18],['address',1513]]
-```
+- Object.is(a, b) 代替===符号的写法。唯一的不同是，NaN===NaN 会判断为 false，而 Object.is(NaN, NaN)会返回 true。
+- Object.assign(target, source) 把 source 对象传入 target 对象.
+- Object.keys(object) 返回一个包含所有属性的数组
+  ```js
+  //给定一个对象或数组，判断它是否为空
+  Object.keys(obj).length === 0;
+  ```
+- Object.values(object) 返回一个包含所有属性值的数组
+- Object.entries(object) 把对象变为数组 //[['name','wzt'],['age',18],['address',1513]]
 
 ##### Map WeakMap 对象
 
