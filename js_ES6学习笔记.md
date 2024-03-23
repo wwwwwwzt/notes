@@ -205,10 +205,46 @@ Object.prototype.toString.call(arr).slice(8, -1) === 'Array';
 - 基本类型数据不具备深浅拷贝。赋值既不是深拷贝也不是浅拷贝，只是跟深拷贝是类似。
 - concat()、slice()对一维数组来说是深拷贝，多维数组的话是浅拷贝
 
-##### for-in for-of
+##### for-in for-of forEach
 
-for-in 用于枚举 object 中的非 Symbol 的“key” `for(const key in obj)`
-for-of 用于遍历可迭代的对象的元素。如 Array，String，Map，Set 等。`for (let value of arr)`
+- for-in 用于枚举 object 中的非 Symbol 的“key” `for(const key in obj)`不建议与数组一起使用，因为输出的顺序是不固定的。
+
+  - for-in 除了遍历对象自身的属性外，还会遍历从原型链上继承到的属性。
+    如果你只要考虑对象本身的属性，而不是它的原型，那么使用 hasOwnProperty() 来确定某属性是否是对象本身的属性。
+    ```js
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        console.log(obj[prop]);
+      }
+    }
+    ```
+
+- for-of 用于遍历可迭代的对象的元素。如 Array，String，Map，Set 等。`for (let value of arr)`
+
+- 使用 for-in 循环时，获得的是数组的下标；使用 for-of 循环时，获得的是数组的元素值。
+- forEach() 方法对数组的每个元素执行一次给定的函数
+  `array1.forEach(element => console.log(element));`
+- map() 方法创建一个新数组，其结果为这个新数组中的每个元素是调用一次提供的函数后的返回值。
+  `const map1 = array1.map(x => x * 2);`
+
+##### map 方法
+
+- map
+  ```js
+  //返回一个新的对象数组，其中的每个对象就是return{}中的内容
+  const list_new = list.map(function (item) {
+    return {
+      id: item.name,
+      age_state: item.age <= 18 ? '未成年' : '成年人',
+    };
+  });
+  ```
+- 对象的深拷贝
+  ```js
+  const i = { a: 123, b: '123' };
+  let obj = {};
+  Object.assign(obj, i);
+  ```
 
 ##### 解构复制
 
@@ -277,21 +313,6 @@ for-of 用于遍历可迭代的对象的元素。如 Array，String，Map，Set 
     const b = {cc:3, dd:4};
     const c = {..a, ..b}; //c {aa:1, bb:2, cc:3, dd:4}
     ```
-- find findIndex 函数（返回子项）
-  ```js
-  const list = [
-    { name: 'zs', age: 10 },
-    { name: 'ls', age: 11 },
-    { name: 'ww', age: 12 },
-    { name: 'zl', age: 10 },
-  ];
-  //此处返回的不是boolean值，而是找到的第一个满足条件的对象
-  const result = list.find((item) => {
-    return item.age === 10;
-  });
-  //也可以简写为
-  const result2 = list.find((item) => item.age === 10);
-  ```
 - filter 函数（返回数组）
   ```js
   //此处返回的不是boolean，而是一个新的对象数组
@@ -300,41 +321,62 @@ for-of 用于遍历可迭代的对象的元素。如 Array，String，Map，Set 
   });
   ```
 
-##### map 方法
+##### 数组原生方法
 
-- map
+- 判断方法：Array.isArray()
+- 合并的方法：concat()，返回的是拼接好的数组，不影响原数组。
+  `var nums = num1.concat(num2, num3);`
+- 数组和字符串的转换方法：toString()、join()， 其中 join() 方法可以指定转换为字符串时的分隔符。
   ```js
-  //返回一个新的对象数组，其中的每个对象就是return{}中的内容
-  const list_new = list.map(function (item) {
-    return {
-      id: item.name,
-      age_state: item.age <= 18 ? '未成年' : '成年人',
-    };
+  const elements = ['Fire', 'Air', 'Water'];
+  console.log(elements.join()); // "Fire,Air,Water"
+  console.log(elements.join('')); // "FireAirWater"
+  ```
+- 尾部操作的方法： pop() 和 push()，push() 方法可以传入多个参数。
+- 首部操作的方法: shift() 和 unshift()
+- 重排序的方法：reverse() 和 sort()。reverse() 方法将数组中元素的位置颠倒，并返回该数组。该方法会改变原数组。sort() 方法可以传入一个函数来进行比较，传入前后两个值，如果返回值为正数，则 b 会被排列到 a 之前；如果返回值为负数， a 会被排列到 b 之前。
+  ```js
+  var numbers = [4, 2, 5, 1, 3];
+  numbers.sort(function (a, b) {
+    return a - b;
   });
+  console.log(numbers); // [1, 2, 3, 4, 5]
   ```
-- 对象的深拷贝
+- 截取办法: slice()，用于截取数组中的一部分，返回一个新的数组对象，不影响原数组。arr.slice(begin, end)，slice 会提取原数组中索引从 begin 到 end 的所有元素（包含 begin，但不包含 end）。slice()方法是浅拷贝。
   ```js
-  const i = { a: 123, b: '123' };
-  let obj = {};
-  Object.assign(obj, i);
+  //待续
   ```
-
-##### 属性、方法的简写
-
-```js
-ES5           ------>         ES6
-let obj = {                   let obj={
-  name: name,                   name,
-  age: age,                     obj,
-  sayHello(): function(){       sayHello(){
-    ...                           ...
-  }                             }
-}                             }
-```
+- 删除、替换或插入方法： splice()，通过删除或替换现有元素或者原地添加新的元素来修改数组,并以数组形式返回被修改的内容 (注意不是整个数组)。此方法会改变原数组。
+  ```js
+  //待续
+  ```
+- 元素查找方法：indexOf()、includes()、find() 和 findIndex()
+  - indexOf()
+    返回在数组中可以找到一个给定元素的第一个索引，如果不存在，则返回-1。使用严格相等`===`比较 searchElement 和数组中的元素
+    ```js
+    var indices = []; //找出指定元素出现的所有位置
+    var array = ['a', 'b', 'a', 'c', 'a', 'd'];
+    var element = 'a';
+    var idx = array.indexOf(element); //找到第一个
+    while (idx != -1) {
+      //找到剩下的
+      indices.push(idx);
+      idx = array.indexOf(element, idx + 1);
+    }
+    console.log(indices);
+    ```
+  - include()
+    用来判断一个数组是否包含一个指定的值，根据情况，如果包含则返回 true，否则返回 false
+  - find()
+    f对数组中的每一项元素执行一次 callback 函数，直至有一个 callback 返回 true。当找到了这样一个元素后，该方法会立即返回这个元素的值，否则返回 undefined。
+    `const result2 = list.find((item) => item.age === 10);`
+- 迭代方法：forEach()、map()、filter()、every() 和 some()
+- 归并方法： reduce()
+- 扁平化方法： flat()
 
 ##### Object 方法
 
-- Object.is(a, b) 代替===符号的写法。唯一的不同是，NaN===NaN 会判断为 false，而 Object.is(NaN, NaN)会返回 true。
+- Object.is(a, b) 代替`===`符号的写法。唯一的不同是，`NaN===NaN` 会判断为 false，而 Object.is(NaN, NaN)会返回 true。
 - Object.assign(target, source) 把 source 对象传入 target 对象.
 - Object.keys(object) 返回一个包含所有属性的数组
   ```js
@@ -343,6 +385,54 @@ let obj = {                   let obj={
   ```
 - Object.values(object) 返回一个包含所有属性值的数组
 - Object.entries(object) 把对象变为数组 //[['name','wzt'],['age',18],['address',1513]]
+
+##### this
+
+- 在函数体中，函数内的 this 会被绑定到全局对象 window/global 上（非严格模式下）。严格模式下，函数内的 this 会被绑定到 undefined 上。
+- 使用 new 方法调用构造函数时，构造函数内的 this 会被绑定到新创建的对象上。
+- 通过 call/apply/bind 方法显式调用函数时，函数体内的 this 会被绑定到指定参数的对象上。
+- 通过上下文对象调用函数时，函数体内的 this 指向最后调用它的对象。
+  ```js
+  var person = {
+    name: 'Lucas',
+    brother: {
+      name: 'Mike',
+      fn: function () {
+        return this.name;
+      },
+    },
+  };
+  person.brother.fn(); // Mike 最后的this指向的是 brother
+  ```
+- 在箭头函数中，箭头函数没有自己的 this，箭头函数的 this 就是上下文中定义的 this。
+
+  ```js
+  var A = {
+    name: 'A',
+    sayHello: () => {
+      console.log(this.name);
+    },
+  };
+  A.sayHello(); // 以为输出A ? 其实this绑定在window上的
+  ```
+
+- 在定时器中，this 指向 window，因为定时器中采用回调函数作为处理函数，而回调函数的指向 window
+  ```js
+  const obj = {
+    index: 1,
+    a: function () {
+        window.setTimeout(function name() {
+          //如果这里用箭头函数，则定时器里的this与外层的this保持一致
+            console.log('this.index', this.index);
+            console.log('this', this);
+        }, 1000)
+    }
+  }
+  obj.a()
+  // 执行情况：
+  this.index undefined  //换成箭头函数后 1
+  this Window {0: Window, window: Window, …}//{index: 1, a: ƒ}
+  ```
 
 ##### Map WeakMap 对象
 
@@ -383,7 +473,7 @@ let set = new Set(arr); //数组的去重
 
 &emsp;&emsp;WeakMap 结构不可遍历。因为它的成员都是对象的弱引用，随时被回收机制回收，成员消失。
 
-##### 类型转换
+##### Map Set 的类型转换
 
 ```js
 //对象转Map
@@ -695,3 +785,62 @@ Counter.decrement();
 console.log(Counter.value()); /* logs 0 */
 console.log(Counter); //{increment: ƒ, decrement: ƒ, value: ƒ}
 ```
+
+##### call apply bind
+
+- 在 javascript 中，call 和 apply 都是为了改变某个函数运行时的上下文（context）而存在的，换句话说，就是为了改变函数体内部 this 的指向。JavaScript 的一大特点是，函数存在「定义时上下文」和「运行时上下文」以及「上下文是可以改变的」这样的概念。
+
+- call 和 apply 是为了动态改变 this 而出现的，当一个 object 没有某个方法（例子中 banana 没有 say 方法），但是其他的有（apple 有 say 方法），可以借助 call 或 apply 用其它对象的方法来操作。
+
+  ```js
+  function fruits() {}
+  fruits.prototype = {
+    color: 'red',
+    say: function () {
+      console.log('My color is ' + this.color);
+    },
+  };
+
+  var apple = new fruits();
+  apple.say(); //My color is red
+  banana = {
+    color: 'yellow',
+  };
+  apple.say.call(banana); //My color is yellow
+  apple.say.apply(banana); //My color is yellow
+  ```
+
+- apply
+  `func.apply(thisArg, [argsArray])`
+  thisArg：必选的。在 func 函数运行时指定使用的 this 值。
+  argsArray：可选的。一个数组或者类数组对象，其中的数组元素将作为单独的参数传给 func 函数。
+- call
+  `function.call(thisArg, arg1, arg2, ...)`
+  thisArg：可选的。在 function 函数运行时使用的 this 值。
+  arg1, arg2, ...：可选的。指定的参数列表。
+- bind
+  `function.bind(thisArg, arg1, arg2, ...)()`
+  call/apply 的时候，会立即执行函数，但是 bind 会创建一个新函数，不会立即执行。
+
+- 用途
+  - 合并两个数组
+    ```js
+    var array1 = [12 , "foo" , {name "Joe"} , -2458];
+    var array2 = ["Doe" , 555 , 100];
+    Array.prototype.push.apply(array1, array2);
+    /* array1 值为  [12 , "foo" , {name "Joe"} , -2458 , "Doe" , 555 , 100] */
+    ```
+    push() 方法可以将一个或多个元素添加到数组的末尾。用 push 方法合并两个数组如果不用上面这种写法的话，就只能通过遍历将 array2 的每个元素 push 到 array1 中达到合并数组的目的。直接 array1.push(array2) 的话，只会把 array2 当作一个元素 push 到 array1 里，变成一个多维数组。
+  - 找数组最大值
+    数组 numbers 本身没有 max 方法，但是 Math 有呀，所以这里就是借助 call / apply 使用 Math.max 方法
+    `let maxInNumbers = Math.max.apply(Math, numbers)`
+    或者简单点
+    `let maxInNumbers = Math.max(...numbers)`
+  - 判断数据类型
+    直接用 string 或是 number 的 toString()方法并不好用来判断类型。让 string 或是 number 类型的变量用 Object 的 toString()方法就能判断类型。
+    ```js
+    console.log('a'.toString()); //a
+    console.log((123).toString()); //123
+    console.log(Object.prototype.toString.call('a')); //[object String]
+    console.log(Object.prototype.toString.call(123)); //[object Number]
+    ```
