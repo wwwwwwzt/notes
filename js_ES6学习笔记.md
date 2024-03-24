@@ -368,11 +368,42 @@ Object.prototype.toString.call(arr).slice(8, -1) === 'Array';
   - include()
     用来判断一个数组是否包含一个指定的值，根据情况，如果包含则返回 true，否则返回 false
   - find()
-    f对数组中的每一项元素执行一次 callback 函数，直至有一个 callback 返回 true。当找到了这样一个元素后，该方法会立即返回这个元素的值，否则返回 undefined。
+    对数组中的每一项元素执行一次 callback 函数，直至有一个 callback 返回 true。当找到了这样一个元素后，该方法会立即返回这个元素的值，否则返回 undefined。
     `const result2 = list.find((item) => item.age === 10);`
 - 迭代方法：forEach()、map()、filter()、every() 和 some()
+  - forEach() 对数组的每个元素执行一次给定的函数。
+    ```js
+    for (let i = 0; i < items.length; i++) {
+      copy.push(items[i]);
+    }
+    // after
+    items.forEach(function (item) {
+      copy.push(item);
+    });
+    //手写展平数组
+    function flatten(arr) {
+      const result = [];
+      arr.forEach((i) => {
+        if (Array.isArray(i)) result.push(...flatten(i));
+        else result.push(i);
+      });
+      return result;
+    }
+    const problem = [1, 2, 3, [4, 5, [6, 7], 8, 9]];
+    flatten(problem); // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    ```
+  - map()
+    创建一个新数组，该方法会给原数组中的每个元素都按顺序调用一次 callback 函数。返回一个由原数组每个元素执行回调函数的结果组成的新数组。
+  - filter()
+    创建一个新数组，该方法为数组中的每个元素调用一次 callback 函数，并且将所有使 callback 返回 true 或等价于 true 的值的元素创建一个新数组。
 - 归并方法： reduce()
 - 扁平化方法： flat()
+  flat() 方法会按照一个可指定的深度递归遍历数组，并将所有元素与遍历到的子数组中的元素合并为一个新数组返回。
+  ```js
+  var arr = [1, 2, [3, 4, [5, 6]]];
+  arr.flat(); // [1, 2, 3, 4, [5, 6]]
+  arr.flat(2);// [1, 2, 3, 4, 5, 6]
+  ```
 
 ##### Object 方法
 

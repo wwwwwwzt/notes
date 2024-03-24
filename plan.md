@@ -46,6 +46,7 @@ https://leetcode.cn/problemset/javascript/
 | ---- | -------- | ---- |
 | 3/19 | 5        | 5    |
 | 3/21 | 3        | 8    |
+| 3/24 | 8        | 16   |
 
 ### 视频课
 
