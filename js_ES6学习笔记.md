@@ -402,7 +402,7 @@ Object.prototype.toString.call(arr).slice(8, -1) === 'Array';
   ```js
   var arr = [1, 2, [3, 4, [5, 6]]];
   arr.flat(); // [1, 2, 3, 4, [5, 6]]
-  arr.flat(2);// [1, 2, 3, 4, 5, 6]
+  arr.flat(2); // [1, 2, 3, 4, 5, 6]
   ```
 
 ##### Object 方法
@@ -875,3 +875,53 @@ console.log(Counter); //{increment: ƒ, decrement: ƒ, value: ƒ}
     console.log(Object.prototype.toString.call('a')); //[object String]
     console.log(Object.prototype.toString.call(123)); //[object Number]
     ```
+
+##### 类数组
+
+arguments 是一个对应于传递给函数的参数的类数组对象。arguments 与数组相似，但是它却没有数组常见的方法属性，如 forEach, reduce 等，所以叫它们类数组。
+
+- 遍历类数组
+
+  - call apply
+    `Array.prototype.forEach.call(arguments, (a) => console.log(a));`
+  - 使用 Array.from()方法将类数组转化成数组
+    `const arrArgs = Array.from(arguments);`
+
+  - 使用...展开运算符将类数组转化成数组
+    ```js
+    const arrArgs = [...arguments];
+    arrArgs.forEach((a) => console.log(a));
+    ```
+
+##### DOM
+
+- 节点获取
+  ```js
+  // 按照 id 查询
+  var imooc = document.getElementById('bjut'); //按照 id 查询
+  var pList = document.getElementsByTagName('p'); //按照标签名查询，这是个列表
+  var moocList = document.getElementsByClassName('bjut'); //按照类名查询
+  var pList = document.querySelectorAll('.bjut'); //按照 css 选择器查询
+  ```
+- 节点删除
+  ```js
+  // 获取目标元素的父元素
+  var container = document.getElementById('container');
+  // 获取目标元素
+  var targetNode = container.childNodes[1];
+  // 删除目标元素
+  container.removeChild(targetNode);
+  ```
+- 获取父元素
+  `var parent = div1.parentElement`
+
+##### eval()
+
+eval() 方法会将传入的字符串当做 JavaScript 代码进行执行。如果 eval() 的参数不是字符串，eval() 会将参数原封不动地返回。
+
+```js
+eval("var msg = 'hello world'; ");
+alert(msg); //"hello world"
+eval(new String('2 + 2')); // 返回了包含"2 + 2"的字符串对象
+eval('2 + 2'); // returns 4
+```
