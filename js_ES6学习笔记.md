@@ -186,6 +186,11 @@ JavaScript 是动态的，本身不提供一个 class 的实现。即便是在 E
 
 - 原型对象也可能拥有原型，这样一层一层，最终指向 null。
   <img src="2024-03-11-17-28-45.png" style="zoom:40%"/>
+- 对原型的理解
+  - 原型主要是解决继承问题
+  - 每个对象拥有一个原型对象，通过 **proto** 指针指向其原型对象，并从中继承方法和属性
+  - 同时原型对象也可能拥有原型，这样一层一层，最终指向 null（Object.proptotype.proto 指向的是 null）
+  - 上述的关系被称为原型链，通过原型链一个对象可以拥有定义在其他对象中的属性和方法
 
 ##### 判断是否为数组的方式
 
@@ -659,9 +664,10 @@ export default {          import test from '...'
 
 ##### Promise
 
-- Promise 是一个容器，里面保存着某个未来才会结束的事件（通常为异步）的结果
-- Promise 是一个对象，它可以获取异步操作的最终状态（成功或失败）
-- Promise 是一个构造函数，提供统一的 API。里面也可以放同步的代码。
+- 是什么
+  - Promise 是一个容器，里面保存着某个未来才会结束的事件（通常为异步）的结果
+  - Promise 是一个对象，它可以获取异步操作的最终状态（成功或失败）
+  - Promise 是一个构造函数，提供统一的 API。里面也可以放同步的代码。
 
 回调地狱 （可读性差、代码耦合、出错时无法排除）
 
@@ -925,3 +931,69 @@ alert(msg); //"hello world"
 eval(new String('2 + 2')); // 返回了包含"2 + 2"的字符串对象
 eval('2 + 2'); // returns 4
 ```
+
+##### 防抖
+
+在事件被触发 n 秒后再执行回调函数，如果在这 n 秒内又被触发，则重新计时。
+
+```js
+var timer;
+handleClick() {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+  console.log("111");
+  }, 1000);
+},
+```
+
+##### 节流
+
+规定一个单位时间，只能有一次触发事件的回调函数执行，如果在同一时间内某事件被触发多次，只有一次能生效。
+
+```js
+var isRun = false
+handleClick() {
+  if (isRun) {
+    return;
+  }
+  isRun = true;
+  setTimeout(() => {
+    isRun = false;
+    console.log("111");
+  }, 1000);
+},
+```
+
+##### 设计模式
+
+- 单例模式
+  确保一个类仅有一个实例，并提供一个访问它的全局访问点。
+  应用场景：网站的登录页、购物车、vuex
+  ```js
+  Car.singleInstance = (function () {
+    let instance;
+    return function (name) {
+      if (!instance) {
+        instance = new Car(name);
+      }
+      return instance;
+    };
+  })();
+  var byd = Car.singleInstance('byd');
+  var xiaomi = Car.singleInstance('xiaomi'); //还是byd
+  ```
+- 工厂模式
+  工厂模式就是把实现相同功能写在函数中，需要实现相同逻辑的地方直接调用函数，减少代码重复。
+  ```js
+  function createCar(name,age){
+    var obj = {}
+    obj.brand = name,
+    obj.color = age,
+    obj.sayHelllo = function(){
+      console.log('Hello')
+    }
+    return obj;
+  }​
+  const car1 = createCar('宝马','白色')
+  const car2 = createCar('奔驰','黑色')
+  ```
