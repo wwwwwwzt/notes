@@ -267,12 +267,12 @@ Object.prototype.toString.call(arr).slice(8, -1) === 'Array';
   ```
 - 读取接口返回的数据
   ```javascript
-  function xd() {
+  function func() {
     return {
-      name: 'xdclass',
+      name: 'bjut',
       wangzhi: [
         {
-          url: 'xdclass.net',
+          url: 'bjut.net',
         },
       ],
     };
@@ -941,7 +941,7 @@ var timer;
 handleClick() {
   clearTimeout(timer);
   timer = setTimeout(() => {
-  console.log("111");
+    console.log("111");
   }, 1000);
 },
 ```
