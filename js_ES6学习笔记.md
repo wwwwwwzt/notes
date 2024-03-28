@@ -934,35 +934,111 @@ eval('2 + 2'); // returns 4
 
 ##### 防抖
 
-在事件被触发 n 秒后再执行回调函数，如果在这 n 秒内又被触发，则重新计时。
+- 在事件被触发 n 秒后再执行回调函数，如果在这 n 秒内又被触发，则重新计时。
+- 应用场景
+  - 限制 鼠标连击 触发
+  - 每次 resize/scroll 触发统计事件
+  - 文本输入的验证（连续输入文字后发送 AJAX 请求进行验证，验证一次就好）
+- 非立即执行版
 
-```js
-var timer;
-handleClick() {
-  clearTimeout(timer);
-  timer = setTimeout(() => {
-    console.log("111");
-  }, 1000);
-},
-```
+  ```js
+  function debounce(func, delay) {
+    let timer;
+    return function () {
+      let context = this;
+      if (timer) clearTimeout(timer); // 每次执行的时候把前一个 setTimeout clear 掉
+      timer = setTimeout(() => {
+        func.apply(context, arguments);
+      }, delay);
+    };
+  }
+  ```
+
+  - 在 setTimeout 中，this 指向 window，正常情况下我们给 button 绑定一个事件，函数里 this 的指向应该是这个 button 标签。而在定时器中，this 指向了 window。因此可以在 setTimeout 前面就把 this 保存下来`let context = this;` 然后我们在 setTimeout 里面用 apply 来绑定这个 this 给要执行的方法，这样 this 的指向就正确了。
+  - 使用箭头函数，就不需要在 setTimeout 方法前“let args=arguments”了，因为箭头函数里的 arguments 就是外层函数的 arguments
+
+- 立即执行版 （没明白）
+  触发事件后函数会立即执行，然后 n 秒内不触发事件才能继续执行函数的效果。
+
+  ```js
+  function debounce(func, delay) {
+    let timer;
+    return function () {
+      let context = this;
+      if (timer) clearTimeout(timer);
+
+      let callNow = !timer;
+      timer = setTimeout(() => {
+        timer = null;
+      }, delay);
+
+      if (callNow) func.apply(context, arguments);
+    };
+  }
+  ```
+
+- 合并版
+
+  ```js
+  //immediate true 表立即执行，false 表非立即执行
+  function debounce(func, delay, immediate) {
+    let timer;
+    return function () {
+      let context = this;
+
+      if (timer) clearTimeout(timer);
+      if (immediate) {
+        let callNow = !timer;
+        timer = setTimeout(() => {
+          timer = null;
+        }, delay);
+        if (callNow) func.apply(context, arguments);
+      } else {
+        timer = setTimeout(() => {
+          func.apply(context, arguments);
+        }, delay);
+      }
+    };
+  }
+  ```
 
 ##### 节流
 
-规定一个单位时间，只能有一次触发事件的回调函数执行，如果在同一时间内某事件被触发多次，只有一次能生效。
+- 规定一个单位时间，只能有一次触发事件的回调函数执行，如果在同一时间内某事件被触发多次，只有一次能生效。
+- 应用场景
+  - 射击游戏的 mousedown/keydown 事件（单位时间只能发射一颗子弹）
+  - 搜索联想（keyup）
+  - 监听滚动事件判断是否到页面底部自动加载更多：给 scroll 加了 debounce 后，只有用户停止滚动后，才会判断是否到了页面底部；如果是 throttle 的话，只要页面滚动就会间隔一段时间判断一次
 
-```js
-var isRun = false
-handleClick() {
-  if (isRun) {
-    return;
+- 定时器版
+  ```js
+  function throttle(func, wait) {
+    // 定时器版
+    let timer;
+    return function () {
+      let context = this;
+      if (!timer) {
+        timer = setTimeout(() => {
+          timer = null;
+          func.apply(context, arguments);
+        }, wait);
+      }
+    };
   }
-  isRun = true;
-  setTimeout(() => {
-    isRun = false;
-    console.log("111");
-  }, 1000);
-},
-```
+  ```
+- 时间戳版
+  ```js
+  function throttle(func, wait) {
+    let previous = 0;
+    return function () {
+      let now = new Date();
+      if (now - previous > wait) {
+        previous = now;
+        func.apply(this, arguments);
+      }
+    };
+  }
+  ```
 
 ##### 设计模式
 
