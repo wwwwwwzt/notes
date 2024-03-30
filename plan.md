@@ -52,6 +52,7 @@ https://leetcode.cn/problemset/javascript/
 | 3/27 | 2        | 30   |
 | 3/28 | 11       | 41   |
 | 3/29 | 4        | 45   |
+| 3/30 | 3        | 48   |
 
 ### 视频课
 
