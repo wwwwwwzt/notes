@@ -664,45 +664,63 @@ export default {          import test from '...'
 
 ##### Promise
 
+```js
+//回调地狱 （可读性差、代码耦合、出错时无法排除）
+axios.get('a.json').then((res) => {
+  if (res && res.data.code === 0) {
+    axios.get('b.json').then((res) => {
+      if (res && res.data.code === 0) {
+        axios.get('c.json').then((res) => {});
+      }
+  ...
+```
+
 - 是什么
+
   - Promise 是一个容器，里面保存着某个未来才会结束的事件（通常为异步）的结果
   - Promise 是一个对象，它可以获取异步操作的最终状态（成功或失败）
   - Promise 是一个构造函数，提供统一的 API。里面也可以放同步的代码。
 
-回调地狱 （可读性差、代码耦合、出错时无法排除）
-
-```js
-function request() {
-  axios.get('a.json').then((res) => {
-    if (res && res.data.code === 0) {
-      axios.get('b.json').then((res) => {
-        if (res && res.data.code === 0) {
-          axios.get('c.json').then((res) => {});
+- 一个 Promise 必然处于以下几种状态之一：
+  - 待定 (pending): 初始状态，既没有被兑现，也没有被拒绝。
+  - 已成功 (fulfilled): 意味着操作成功完成。
+  - 已拒绝 (rejected): 意味着操作失败。
+  - 当 promise 被调用后，它会以处理中状态 (pending) 开始。 这意味着调用的函数会继续执行，而 promise 仍处于处理中直到解决为止。被创建的 promise 最终会以 fulfilled 或 被 rejected 结束，并在完成时调用相应的回调函数（传给 then 和 catch）。
+- then()
+  - then()定义在原型对象 Promise.prototype 上。它的作用是为 Promise 实例添加状态改变时的回调函数。then()的第一个参数是 resolved 状态的回调函数，第二个参数（可选）是 rejected 状态的回调函数。
+  - then 方法返回的是一个新的 Promise 实例（不是原来的 Promise 实例）。因此可以采用链式写法，即 then 方法后面再调用另一个 then 方法
+  ```js
+  //第一个回调函数完成以后，会将返回结果作为参数，传入第二个回调函数
+  getJSON('/posts.json')
+    .then(function (json) {
+      return json.post;
+    })
+    .then(function (post) {
+      // ...
+    });
+  ```
+- 不同于“老式”的传入回调，在使用 Promise 时，会有以下约定：
+  - 在本轮**事件循环**运行完成之前，回调函数是不会被调用的。
+  - 即使异步操作已经完成（成功或失败），在这之后通过 then() 添加的回调函数也会被调用。
+  - 通过多次调用 then() 可以添加多个回调函数，它们会按照插入顺序进行执行。
+- Promisifying （没太明白）
+  ```js
+  const getFile = (fileName) => {
+    return new Promise((resolve, reject) => {
+      fs.readFile(fileName, (err, data) => {
+        if (err) {
+          reject(err); // 调用 `reject` 会导致 promise 失败，无论是否传入错误作为参数，
+          return; // 且不再进行下去。
         }
+        resolve(data);
       });
-    }
-  });
-}
-```
+    });
+  };
+  getFile('/etc/passwd')
+    .then((data) => console.log(data))
+    .catch((err) => console.error(err));
+  ```
 
-Promise
-
-```js
-new Promise((resolve, reject) => {  //初始状态pending
-  resolve('成功');  //成功状态resolve
-  reject('失败');   //失败状态rejected
-})
-// .then(,)有两个入参，第一个成功时执行，第二个失败时执行。
-// 第二个入参的效果等同于.catch()，用.catch居多。
-.then((res) => {
-  console.log(res);
-},(err)=>{
-  console.log(err);
-});
-.catch((err) => {
-  console.log(err);
-});
-```
 
 Promise 解决回调地狱
 
@@ -719,7 +737,7 @@ function request() {
   });
 }
 
-function request() {
+function () {
   requestA()
     .then((res) => {
       console.log(res);
@@ -1006,6 +1024,7 @@ eval('2 + 2'); // returns 4
 
 - 规定一个单位时间，只能有一次触发事件的回调函数执行，如果在同一时间内某事件被触发多次，只有一次能生效。
 - 应用场景
+
   - 射击游戏的 mousedown/keydown 事件（单位时间只能发射一颗子弹）
   - 搜索联想（keyup）
   - 监听滚动事件判断是否到页面底部自动加载更多：给 scroll 加了 debounce 后，只有用户停止滚动后，才会判断是否到了页面底部；如果是 throttle 的话，只要页面滚动就会间隔一段时间判断一次

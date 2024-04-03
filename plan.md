@@ -54,6 +54,7 @@ https://leetcode.cn/problemset/javascript/
 | 3/29 | 4        | 45   |
 | 3/30 | 3        | 48   |
 | 4/2  | 2        | 50   |
+| 4/3  | 2        | 52   |
 
 ### 视频课
 
