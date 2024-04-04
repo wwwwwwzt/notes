@@ -422,7 +422,7 @@ Object.prototype.toString.call(arr).slice(8, -1) === 'Array';
 - Object.values(object) 返回一个包含所有属性值的数组
 - Object.entries(object) 把对象变为数组 //[['name','wzt'],['age',18],['address',1513]]
 
-##### this
+##### this 指向问题
 
 - 在函数体中，函数内的 this 会被绑定到全局对象 window/global 上（非严格模式下）。严格模式下，函数内的 this 会被绑定到 undefined 上。
 - 使用 new 方法调用构造函数时，构造函数内的 this 会被绑定到新创建的对象上。
@@ -720,41 +720,93 @@ axios.get('a.json').then((res) => {
     .then((data) => console.log(data))
     .catch((err) => console.error(err));
   ```
-
-
-Promise 解决回调地狱
-
-```js
-function request() {
-  return new Promise((resolve, reject) => {
-    axios.get('a.json').then((res) => {
-      if (res && res.status === 200) {
-        resolve(res.data.data.data);
-      } else {
-        reject('a接口请求失败');
-      }
+- Promise 解决回调地狱
+  ```js
+  function request() {
+    return new Promise((resolve, reject) => {
+      axios.get('a.json').then((res) => {
+        if (res && res.status === 200) {
+          resolve(res.data.data.data);
+        } else {
+          reject('a接口请求失败');
+        }
+      });
     });
+  }
+  function () {
+    requestA()
+      .then((res) => {
+        console.log(res);
+        return requestB();
+      })
+      .then((res) => {
+        console.log(res);
+        return requestC();
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  ```
+- Promise.resolve()
+
+  - 有时需要将现有对象转为 Promise 对象，Promise.resolve()方法就起到这个作用。
+
+  ```js
+  Promise.resolve('foo'); // 等价于
+  new Promise((resolve) => resolve('foo'));
+  ```
+
+  - 参数是一个 thenable 对象 （暂时略过）
+  - 参数不是具有 then 方法的对象，或根本就不是对象
+    Promise.resolve()返回一个新的 Promise 对象，状态为 resolved。下面代码中，p 的状态从一生成就是 resolved，所以回调函数会立即执行。
+
+    ```js
+    const p = Promise.resolve('Hello');
+    p.then(function (s) {
+      console.log(s); // Hello
+    });
+    ```
+
+  - 不带有任何参数
+    - 直接返回一个 resolved 状态的 Promise 对象。所以，如果希望得到一个 Promise 对象，比较方便的方法就是直接调用 Promise.resolve()方法。
+    - 需要注意的是，立即 resolve()的 Promise 对象，是在本轮“事件循环”（event loop）的结束时执行，而不是在下一轮“事件循环”的开始时。
+    ```js
+    setTimeout(function () {
+      console.log('three');
+    }, 0);
+    Promise.resolve().then(function () {
+      console.log('two');
+    });
+    console.log('one');
+    // one two three
+    ```
+    上面代码中，setTimeout(fn, 0)在下一轮“事件循环”开始时执行，Promise.resolve()在本轮“事件循环”结束时执行，console.log('one')则是立即执行，因此最先输出。
+
+- Promise.reject()
+  - Promise.reject(reason)方法会返回一个新的 Promise 实例，该实例的状态为 rejected。
+  ```js
+  const p = Promise.reject('出错了'); // 等同于
+  const p = new Promise((resolve, reject) => reject('出错了'));
+  p.then(null, function (s) {
+    console.log(s); // 出错了
   });
-}
-
-function () {
-  requestA()
-    .then((res) => {
-      console.log(res);
-      return requestB();
-    })
-    .then((res) => {
-      console.log(res);
-      return requestC();
-    })
-    .then((res) => {
-      console.log(res);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-}
-```
+  ```
+  上面代码生成一个 Promise 对象的实例 p，状态为 rejected，回调函数会立即执行。注意，Promise.reject()方法的参数，会原封不动地作为 reject 的理由，变成后续方法的参数。这一点与 Promise.resolve 方法不一致。
+- Promise.prototype.then()
+  - then()的作用是为 Promise 实例添加状态改变时的回调函数。
+  - 第一个参数是 resolved 状态的回调函数。如果该参数不是函数，则会在内部被替换为 (x) => x，即原样返回 promise 最终结果的函数；
+  - 第二个参数（可选）是 rejected 状态的回调函数。如果该参数不是函数，则会在内部被替换为一个 "Thrower" 函数 (it throws an error it received as argument)。
+  - then 方法中的 return。如果 then 中的回调函数：
+    - 返回了一个值，那么 then 返回的 Promise 将会成为**接受**状态，并且将返回的值作为接受状态的回调函数的参数值。
+    - 没有返回任何值，那么 then 返回的 Promise 将会成为**接受**状态，并且该接受状态的回调函数的参数值为 undefined。
+    - 抛出一个错误，那么 then 返回的 Promise 将会成为**拒绝**状态，并且将抛出的错误作为拒绝状态的回调函数的参数值。
+    - 返回一个已经是接受状态的 Promise，那么 then 返回的 Promise 也会成为**接受**状态，并且将那个 Promise 的接受状态的回调函数的参数值作为该被返回的Promise的接受状态回调函数的参数值。
+    - 返回一个已经是拒绝状态的 Promise，那么 then 返回的 Promise 也会成为**拒绝**状态，并且将那个 Promise 的拒绝状态的回调函数的参数值作为该被返回的Promise的拒绝状态回调函数的参数值。
+    - 返回一个未定状态（pending）的 Promise，那么 then 返回 Promise 的状态也是**未定**的，并且它的终态与那个 Promise 的终态相同；同时，它变为终态时调用的回调函数参数与那个 Promise 变为终态时的回调函数的参数是相同的。
 
 Promise.all()方法
 &emsp;&emsp;此方法接受一个 promise 数组并返回一个 promise。然后当所有的 promise 都完成时会得到结果数组。当其中一个被拒绝时会抛出错误。
@@ -1057,38 +1109,4 @@ eval('2 + 2'); // returns 4
       }
     };
   }
-  ```
-
-##### 设计模式
-
-- 单例模式
-  确保一个类仅有一个实例，并提供一个访问它的全局访问点。
-  应用场景：网站的登录页、购物车、vuex
-  ```js
-  Car.singleInstance = (function () {
-    let instance;
-    return function (name) {
-      if (!instance) {
-        instance = new Car(name);
-      }
-      return instance;
-    };
-  })();
-  var byd = Car.singleInstance('byd');
-  var xiaomi = Car.singleInstance('xiaomi'); //还是byd
-  ```
-- 工厂模式
-  工厂模式就是把实现相同功能写在函数中，需要实现相同逻辑的地方直接调用函数，减少代码重复。
-  ```js
-  function createCar(name,age){
-    var obj = {}
-    obj.brand = name,
-    obj.color = age,
-    obj.sayHelllo = function(){
-      console.log('Hello')
-    }
-    return obj;
-  }​
-  const car1 = createCar('宝马','白色')
-  const car2 = createCar('奔驰','黑色')
   ```
