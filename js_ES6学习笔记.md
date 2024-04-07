@@ -316,7 +316,7 @@ Object.prototype.toString.call(arr).slice(8, -1) === 'Array';
     ```js
     const a = {aa:1, bb:2};
     const b = {cc:3, dd:4};
-    const c = {..a, ..b}; //c {aa:1, bb:2, cc:3, dd:4}
+    const c = {...a, ...b}; //c {aa:1, bb:2, cc:3, dd:4}
     ```
 - filter 函数（返回数组）
   ```js
