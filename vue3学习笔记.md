@@ -193,17 +193,6 @@
 不用 vue 的写法`<div style="font-size:30px; color:blue;" />`
 用 vue 的写法`<div :style="{fontSize:'30px',color:'blue'}" />`，将 css 变成对象。
 
-##### 条件渲染
-
-- v-if v-else-if v-else
-  不展示时直接移除 DOM 元素，适合切换频率低的场景
-  需要连用，中间不能放其他标签。
-- v-show
-  不展示时使用样式隐藏，适合切换频率高的场景
-
-一般来说，v-if 有更高的切换开销，而 v-show 有更高的初始渲染开销。
-如果需要非常频繁地切换，则使用 v-show 较好；如果在运行时条件很少改变，则使用 v-if 较好。
-
 ##### 列表渲染
 
 - v-for 遍历数组
