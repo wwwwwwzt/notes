@@ -147,7 +147,7 @@ console.log(a, b, c);
 
 - 为什么[] == []的结果为 false：引用类型数据存在堆内存中，栈内存中存储的是地址，所以他们的结果是 false。
 
-- 为什么{} == !{}的结果为 true：
+- 为什么{} == !{}的结果为 false：
   - {}.valueOf().toString() 得到字符串'[object Object]'
   - !{} = false
   - Number('[object Object]') == Number(false) 不成立，因为转换到最后 是 NaN 和 0 比较，所以结果为 false
@@ -402,6 +402,7 @@ Object.prototype.toString.call(arr).slice(8, -1) === 'Array';
   - filter()
     创建一个新数组，该方法为数组中的每个元素调用一次 callback 函数，并且将所有使 callback 返回 true 或等价于 true 的值的元素创建一个新数组。
 - 归并方法： reduce()
+  
 - 扁平化方法： flat()
   flat() 方法会按照一个可指定的深度递归遍历数组，并将所有元素与遍历到的子数组中的元素合并为一个新数组返回。
   ```js
