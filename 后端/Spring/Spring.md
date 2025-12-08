@@ -46,7 +46,7 @@ public class UserService {
 
 **DI**：在 IoC 容器中将有依赖关系的 Bean 进行关系绑定
 
-#### 入门案例
+#### IoC 入门案例
 
 1. 创建配置文件
 
@@ -69,6 +69,60 @@ public static void main(stringargs) {
     bookDao.save();
 }
 ```
+
+#### DI 入门案例
+
+```java
+public class BookServiceImpl implements Bookservice {
+    // 删除业务层中使用new的方式创建的dao对象
+    private BookDao bookDao;
+
+    public void save() {
+        bookDao.save()
+    }
+    // 提供对应的set方法，容器会调这个方法
+    public void setBookDao(BookDao bookDao){
+        this.bookDao = bookDao;
+    }
+```
+
+```xml
+<bean id="bookDao" class="com.bjut.dao.impl.BookDaoImpl"/>
+<bean id="bookService" class="com.bjut.service.impl.BookServiceImpl">
+    <!-- 配置server与dao的关系 -->
+    <!-- name表示配置哪一个对象，ref代表参照哪一个Bean -->
+    <property name="bookDao" ref="bookDao"/>
+</bean>
+```
+
+### 实例化（instantiate） Bean
+
+scope 属性：
+
+- singleton 默认 单例
+- prototype 非单例
+  `<Bean id=".." class=".." scope="prototype"/>`
+
+1. 提供空参数的构造函数
+   不管构造函数是 public 还是 prvate，spring 都能调用
+2. 用**静态工厂**
+
+```java
+public class orderDaoFactory {
+    public static OrderDao getOrderDao(){
+        // ...初始化...
+        return new orderDaoImpl();
+    }
+}
+```
+
+让 spring 知道得到的 Bean 不是 orderDaoFactory 类的对象，而是 getOrderDao 方法的返回值类的对象
+
+```xml
+<Bean id="orderDao" class="...orderDaoFactory" factory-method="getOrderDao"/>
+```
+
+3.
 
 ## Beans POJO DTO VO Entity
 
