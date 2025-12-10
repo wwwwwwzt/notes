@@ -122,7 +122,53 @@ public class orderDaoFactory {
 <Bean id="orderDao" class="...orderDaoFactory" factory-method="getOrderDao"/>
 ```
 
-3.
+3. 用**实例工厂**
+
+```java
+// 实例工厂
+public class UserDaoFactory {
+    public UserDao getUserDao(){
+        // ...初始化...
+        return new UserDaoImpl();
+    }
+}
+// 使用工厂
+public static void main(String args[]) {
+    UserDaoFactory userDaoFactory = new UserDaoFactory();
+    UserDao userDao = userDaoFactory.getUserDao();
+
+    userDao.save();
+}
+```
+
+```xml
+<!-- 这个bean没有实际意义，只是配合使用 -->
+<Bean id="userFactory" class="...UserDaoFactory" />
+<Bean id="orderDao" factory-bean="userFactory" factory-method="getUserDao"/>
+```
+
+4. **FactoryBean**
+
+```java
+public class UserDaoFactoryBean implements FactoryBean<UserDao> {
+    // 代替原始实例工厂中创建对象的方法
+    public UserDao getObject() throws Exception {
+        return new UserDaoImpl();
+    }
+    public class<?> getObjectType() {
+        return UserDao.class;
+    }
+    public boolean isSingleton() {
+        return true;
+    }
+}
+```
+
+优化了方法 3，1 个 Bean 就能搞定。注意这里的 Bean 类型不是 UserDaoFactoryBean，而是它的 getObject()方法的返回值
+
+```xml
+<Bean id="userDao" class="...UserDaoFactoryBean" />
+```
 
 ## Beans POJO DTO VO Entity
 
